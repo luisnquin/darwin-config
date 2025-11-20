@@ -1,10 +1,13 @@
 {
+  inputs,
   pkgs,
   ...
 }: {
   environment.systemPackages = [
     pkgs.vim
     pkgs.vscode
+    # Què? Safari es una basura?
+    inputs.zen-browser.packages."${pkgs.stdenv.hostPlatform.system}".beta
   ];
 
   nix.settings.experimental-features = "nix-command flakes";
