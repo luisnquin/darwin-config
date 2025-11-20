@@ -11,11 +11,15 @@
     };
   };
 
-  outputs = {nix-darwin,self, ...} @ inputs: {
+  outputs = {
+    nix-darwin,
+    self,
+    ...
+  } @ inputs: {
     # $ darwin-rebuild build --flake .#dyx
     darwinConfigurations."dyx" = nix-darwin.lib.darwinSystem {
       modules = [./configuration.nix];
-      specialArgs = { inherit inputs; };
+      specialArgs = {inherit inputs;};
     };
   };
 }

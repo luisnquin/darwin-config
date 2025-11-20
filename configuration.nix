@@ -3,6 +3,8 @@
   pkgs,
   ...
 }: {
+  imports = [./options.nix];
+
   environment.systemPackages = [
     pkgs.vim
     pkgs.vscode
@@ -14,10 +16,20 @@
   nixpkgs.hostPlatform = "aarch64-darwin";
   nixpkgs.config.allowUnfree = true;
 
- nix.enable = false;
+  nix.enable = false;
 
   # Enable alternative shell support in nix-darwin.
   programs.fish.enable = true;
+
+  local.dock = {
+    enable = true;
+    username = "luisnquin";
+    entries = [
+      {path = "/Applications/Nix\ Apps/Visual\ Studio\ Code.app/";}
+      {path = "/Applications/Nix\ Apps/Zen\ Browser\ \(Beta\).app/";}
+      {path = "/Applications/Ghostty.app/";}
+    ];
+  };
 
   # Set Git commit hash for darwin-version.
   #system.configurationRevision = self.rev or self.dirtyRev or null;
