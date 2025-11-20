@@ -7,7 +7,7 @@
     };
   };
 
-  outputs = {nix-darwin, ...}: {
+  outputs = {nix-darwin,self, ...}: {
     # $ darwin-rebuild build --flake .#dyx
     darwinConfigurations."dyx" = nix-darwin.lib.darwinSystem {
       modules = [./configuration.nix];
