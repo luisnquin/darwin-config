@@ -16,6 +16,7 @@
   programs.vscode = {
     enable = true;
     profiles.default = {
+      enableUpdateCheck = false;
       userSettings = {
         "files.autoDelay" = 100;
         "files.autoSave" = "afterDelay";
