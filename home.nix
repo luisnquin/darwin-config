@@ -15,10 +15,19 @@
 
   programs.vscode = {
     enable = true;
-    profiles.default.extensions = with pkgs.vscode-extensions; [
-      kamadorueda.alejandra
-      jnoortheen.nix-ide
-      usernamehw.errorlens
-    ];
+    profiles.default = {
+      userSettings = {
+        "files.autoDelay" = 100;
+        "files.autoSave" = "afterDelay";
+        "files.refactoring.autoSave" = true;
+        "[nix]"."editor.tabSize" = 2;
+      };
+
+      extensions = with pkgs.vscode-extensions; [
+        kamadorueda.alejandra
+        jnoortheen.nix-ide
+        usernamehw.errorlens
+      ];
+    };
   };
 }
