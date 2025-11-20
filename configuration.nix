@@ -7,7 +7,6 @@
 
   environment.systemPackages = [
     pkgs.vim
-    pkgs.vscode
   ];
 
   nix.settings.experimental-features = "nix-command flakes";
@@ -23,7 +22,7 @@
     enable = true;
     username = "luisnquin";
     entries = [
-      {path = "/Applications/Nix\ Apps/Visual\ Studio\ Code.app/";}
+      {path = "/Users/luisnquin/Applications/Home\ Manager\ Apps/Visual\ Studio\ Code.app";}
       {path = "/Users/luisnquin/Applications/Home\ Manager\ Apps/Zen\ Browser\ \(Beta\).app";}
       {path = "/Applications/Ghostty.app/";}
     ];
