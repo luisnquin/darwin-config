@@ -24,7 +24,7 @@
     username = "luisnquin";
     entries = [
       {path = "/Applications/Nix\ Apps/Visual\ Studio\ Code.app/";}
-      {path = "/Applications/Nix\ Apps/Zen\ Browser\ \(Beta\).app/";}
+      {path = "/Users/luisnquin/Applications/Home\ Manager\ Apps/Zen\ Browser\ \(Beta\).app";}
       {path = "/Applications/Ghostty.app/";}
     ];
   };
