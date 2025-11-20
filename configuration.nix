@@ -21,9 +21,11 @@
   local.dock = {
     enable = true;
     username = "luisnquin";
-    entries = [
-      {path = "/Users/luisnquin/Applications/Home\ Manager\ Apps/Visual\ Studio\ Code.app";}
-      {path = "/Users/luisnquin/Applications/Home\ Manager\ Apps/Zen\ Browser\ \(Beta\).app";}
+    entries = let
+      mkHomeAppPath = appName: "/Users/luisnquin/Applications/Home Manager Apps/${appName}";
+    in [
+      {path = mkHomeAppPath "Visual Studio Code.app";}
+      {path = mkHomeAppPath "Zen Browser (Beta).app";}
       {path = "/Applications/Ghostty.app/";}
     ];
   };
