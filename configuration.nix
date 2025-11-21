@@ -34,6 +34,20 @@
     "dot" = "cd ~/.dotfiles";
   };
 
+  system.primaryUser = "luisnquin";
+
+  nix-homebrew = {
+    enable = true;
+    user = "luisnquin";
+  };
+
+  homebrew = {
+    enable = true;
+    masApps = {
+      Xcode = 497799835;
+    };
+  };
+
   # Set Git commit hash for darwin-version.
   #system.configurationRevision = self.rev or self.dirtyRev or null;
 

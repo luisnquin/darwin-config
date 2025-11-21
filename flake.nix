@@ -13,10 +13,12 @@
       url = "github:0xc000022070/zen-browser-flake/beta";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-homebrew.url = "github:zhaofengli/nix-homebrew";
   };
 
   outputs = {
     home-manager,
+    nix-homebrew,
     zen-browser,
     nix-darwin,
     nixpkgs,
@@ -27,6 +29,7 @@
     darwinConfigurations."dyx" = nix-darwin.lib.darwinSystem {
       modules = [
         ./configuration.nix
+        nix-homebrew.darwinModules.default
       ];
       specialArgs = {inherit inputs;};
     };
