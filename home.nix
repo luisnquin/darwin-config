@@ -9,9 +9,20 @@
 
   nixpkgs.config.allowUnfree = true;
 
-  home.packages = with pkgs; [
-    alejandra
-  ];
+  home = {
+    packages = with pkgs; [
+      alejandra
+    ];
+
+    shellAliases = {
+      "pr" = "cd ~/Projects";
+    };
+  };
+
+  programs = {
+    fish.enable = true;
+    zsh.enable = true;
+  };
 
   programs.vscode = {
     enable = true;
