@@ -12,10 +12,12 @@
   home = {
     packages = with pkgs; [
       alejandra
+      lazygit
     ];
 
     shellAliases = {
       "pr" = "cd ~/Projects";
+      "lg" = "lazygit";
     };
   };
 
