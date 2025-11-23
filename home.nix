@@ -72,6 +72,9 @@
         "files.autoSave" = "afterDelay";
         "files.refactoring.autoSave" = true;
         "[nix]"."editor.tabSize" = 2;
+        "workbench.iconTheme" = "vira-icons-deepforest";
+        "workbench.colorTheme" = "Vira Deepforest";
+        "workbench.sideBar.location" = "right";
       };
 
       extensions = with pkgs.vscode-extensions;
