@@ -25,7 +25,22 @@
   };
 
   programs = {
-    fish.enable = true;
+    fish = {
+      enable = true;
+      interactiveShellInit = ''
+        set fish_greeting # disable greeting
+      '';
+      plugins = [
+        {
+          name = "fzf"; # Ctrl + R
+          src = pkgs.fishPlugins.fzf-fish.src;
+        }
+        {
+          name = "done";
+          src = pkgs.fishPlugins.done.src;
+        }
+      ];
+    };
     zsh.enable = true;
     ghostty = {
       enable = true;
