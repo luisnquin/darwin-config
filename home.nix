@@ -32,6 +32,10 @@
       '';
       plugins = [
         {
+          name = "grc";
+          src = pkgs.fishPlugins.grc.src;
+        }
+        {
           name = "fzf"; # Ctrl + R
           src = pkgs.fishPlugins.fzf-fish.src;
         }
