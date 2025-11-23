@@ -27,6 +27,81 @@
   programs = {
     fish.enable = true;
     zsh.enable = true;
+    starship = {
+      enable = true;
+      enableFishIntegration = true;
+      enableInteractive = true;
+      enableZshIntegration = true;
+      settings = {
+        add_newline = true;
+        command_timeout = 400;
+        scan_timeout = 30;
+        character = {
+          success_symbol = "[](bold green)";
+          error_symbol = "[](bold red)";
+        };
+        format = pkgs.lib.concatStrings [
+          "$sudo"
+          "$directory"
+          "$hostname"
+          "$git_branch"
+          "$git_state"
+          "$git_metrics"
+          "\${custom.git_remote_diff}"
+          "$c"
+          "$nodejs"
+          "$go"
+          "$nix_shell"
+          "\${custom.dotfiles_workspace}"
+          "\n$character"
+        ];
+
+        cmd_duration = {
+          min_time = 200;
+          show_milliseconds = false;
+          format = "it took [$duration]($style) ";
+        };
+
+        directory = {
+          truncation_length = 2;
+          truncate_to_repo = false;
+          read_only = "";
+          read_only_style = "#454343";
+          style = "#8d3beb";
+        };
+
+        hostname = {
+          ssh_only = false;
+          ssh_symbol = "🌐 ";
+          format = "\\[[$hostname](bold #db2c75)\\] ";
+          trim_at = ".local";
+          disabled = false;
+        };
+
+        custom.git_remote_diff = {
+          description = "Displays the number of commits ahead of the remote";
+          shell = ["bash" "--noprofile" "--norc"];
+          format = "[$symbol $output]($style) ";
+          symbol = "";
+          style = "#5941f2";
+          command = ''
+            branch=$(git rev-parse --abbrev-ref HEAD)
+
+            if git rev-parse --is-inside-work-tree > /dev/null; then
+              ahead=$(git rev-list --count origin/$branch..HEAD)
+
+              if [ "$ahead" -gt 0 ]; then
+                echo "$ahead?"
+              fi
+            fi
+          '';
+          when = ''
+            git rev-parse --is-inside-work-tree > /dev/null &&
+            [ "$(git rev-list --count origin/$(git rev-parse --abbrev-ref HEAD)..HEAD)" -gt 0 ]
+          '';
+        };
+      };
+    };
     fzf = {
       enable = true;
       enableFishIntegration = true;
