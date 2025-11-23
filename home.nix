@@ -27,6 +27,35 @@
   programs = {
     fish.enable = true;
     zsh.enable = true;
+    ghostty = {
+      enable = true;
+      package = null;
+      enableFishIntegration = true;
+      settings = {
+        theme = "Iceberg Dark";
+        cursor-style = "bar";
+        cursor-style-blink = "true";
+        font-synthetic-style = "bold";
+
+        background-opacity = "0.8";
+        link-url = "true";
+        working-directory = "home";
+
+        window-padding-x = "15,4";
+        window-padding-y = "8,6";
+        window-vsync = "false";
+        window-save-state = "never";
+
+        clipboard-read = "allow";
+        clipboard-write = "allow";
+
+        clipboard-trim-trailing-spaces = "true";
+        clipboard-paste-protection = "true";
+        shell-integration = "fish";
+        desktop-notifications = "true";
+        auto-update = "off";
+      };
+    };
     starship = {
       enable = true;
       enableFishIntegration = true;
