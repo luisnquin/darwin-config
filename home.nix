@@ -180,6 +180,10 @@
         "--scrollbar='│'"
       ];
     };
+    nix-index = {
+      enable = true;
+      enableFishIntegration = true;
+    };
   };
 
   programs.vscode = {
