@@ -24,6 +24,7 @@
     entries = let
       mkHomeAppPath = appName: "/Users/luisnquin/Applications/Home Manager Apps/${appName}";
     in [
+      {path = mkHomeAppPath "Notion.app";}
       {path = mkHomeAppPath "Visual Studio Code.app";}
       {path = mkHomeAppPath "Zen Browser (Beta).app";}
       {path = "/Applications/Ghostty.app/";}

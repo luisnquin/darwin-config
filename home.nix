@@ -11,6 +11,7 @@
 
   home = {
     packages = with pkgs; [
+      notion-app
       alejandra
       lazygit
       nodejs
