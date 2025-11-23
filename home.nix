@@ -13,6 +13,8 @@
     packages = with pkgs; [
       alejandra
       lazygit
+      nodejs
+      bun
     ];
 
     shellAliases = {
