@@ -28,6 +28,7 @@
       {path = mkHomeAppPath "Zen Browser (Beta).app";}
       {path = "/Applications/Ghostty.app/";}
       {path = mkHomeAppPath "Notion.app";}
+      {path = "/Applications/Google Chrome.app/";}
     ];
   };
 
@@ -44,6 +45,14 @@
 
   homebrew = {
     enable = true;
+    onActivation = {
+      autoUpdate = true;
+      cleanup = "zap";
+      upgrade = true;
+    };
+    casks = [
+      "google-chrome"
+    ];
     masApps = {
       Xcode = 497799835;
     };
