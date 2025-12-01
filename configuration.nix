@@ -29,6 +29,7 @@
       {path = "/Applications/Ghostty.app/";}
       {path = mkHomeAppPath "Notion.app";}
       {path = "/Applications/Google Chrome.app/";}
+      {path = mkHomeAppPath "Autodesk Fusion.app";}
     ];
   };
 
@@ -52,6 +53,7 @@
     };
     casks = [
       "google-chrome"
+      "autodesk-fusion"
     ];
     masApps = {
       Xcode = 497799835;
