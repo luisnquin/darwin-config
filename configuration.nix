@@ -29,7 +29,7 @@
       {path = "/Applications/Ghostty.app/";}
       {path = mkHomeAppPath "Notion.app";}
       {path = "/Applications/Google Chrome.app/";}
-      {path = mkHomeAppPath "Autodesk Fusion.app";}
+      {path = "/Users/luisnquin/Applications/Autodesk Fusion.app";}
     ];
   };
 
