@@ -1,5 +1,5 @@
 {
-  inputs,
+  config,
   pkgs,
   ...
 }: {
@@ -9,35 +9,23 @@
     pkgs.vim
   ];
 
-  nix.settings.experimental-features = "nix-command flakes";
-  nixpkgs.hostPlatform = "aarch64-darwin";
-  nixpkgs.config.allowUnfree = true;
-
-  nix.enable = false;
-
-  # Enable alternative shell support in nix-darwin.
-  programs.fish.enable = true;
-
-  local.dock = {
-    enable = true;
-    username = "luisnquin";
-    entries = let
-      mkHomeAppPath = appName: "/Users/luisnquin/Applications/Home Manager Apps/${appName}";
-    in [
-      {path = "/System/Applications/App Store.app";}
-      {path = mkHomeAppPath "Zen Browser (Beta).app";}
-      {path = "/Applications/Ghostty.app/";}
-      {path = mkHomeAppPath "Notion.app";}
-      {path = "/Applications/Google Chrome.app/";}
-      {path = "/Users/luisnquin/Applications/Autodesk Fusion.app";}
-    ];
+  nix = {
+    enable = false;
+    settings.experimental-features = "nix-command flakes";
   };
 
+  nixpkgs = {
+    hostPlatform = "aarch64-darwin";
+    config.allowUnfree = true;
+  };
+
+  programs.fish.enable = true;
+  shared.aliases.enable = true;
   system.primaryUser = "luisnquin";
 
   nix-homebrew = {
     enable = true;
-    user = "luisnquin";
+    user = config.system.primaryUser;
   };
 
   homebrew = {
@@ -56,10 +44,20 @@
     };
   };
 
-  shared.aliases.enable = true;
-
-  # Set Git commit hash for darwin-version.
-  #system.configurationRevision = self.rev or self.dirtyRev or null;
+  local.dock = rec {
+    enable = true;
+    username = config.system.primaryUser;
+    entries = let
+      mkHomeAppPath = appName: "/Users/${username}/Applications/Home Manager Apps/${appName}";
+    in [
+      {path = "/System/Applications/App Store.app";}
+      {path = mkHomeAppPath "Zen Browser (Beta).app";}
+      {path = "/Applications/Ghostty.app/";}
+      {path = mkHomeAppPath "Notion.app";}
+      {path = "/Applications/Google Chrome.app/";}
+      {path = "/Users/${username}/Applications/Autodesk Fusion.app";}
+    ];
+  };
 
   # Used for backwards compatibility, please read the changelog before changing.
   # $ darwin-rebuild changelog
