@@ -33,10 +33,6 @@
     ];
   };
 
-  environment.shellAliases = {
-    "dot" = "cd ~/.dotfiles";
-  };
-
   system.primaryUser = "luisnquin";
 
   nix-homebrew = {
@@ -59,6 +55,8 @@
       Xcode = 497799835;
     };
   };
+
+  shared.aliases.enable = true;
 
   # Set Git commit hash for darwin-version.
   #system.configurationRevision = self.rev or self.dirtyRev or null;

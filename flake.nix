@@ -14,9 +14,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";
+    black-terminal = {
+      url = "github:luisnquin/black-terminal";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
+    black-terminal,
     home-manager,
     nix-homebrew,
     zen-browser,
@@ -28,8 +33,9 @@
     # $ darwin-rebuild build --flake .#dyx
     darwinConfigurations."dyx" = nix-darwin.lib.darwinSystem {
       modules = [
-        ./configuration.nix
+        black-terminal.darwinModules.default
         nix-homebrew.darwinModules.default
+        ./configuration.nix
       ];
       specialArgs = {inherit inputs;};
     };
@@ -38,8 +44,9 @@
       pkgs = nixpkgs.legacyPackages.aarch64-darwin;
       extraSpecialArgs = {inherit inputs;};
       modules = [
-        ./home.nix
+        black-terminal.homeModules.default
         zen-browser.homeModules.default
+        ./home.nix
       ];
     };
   };
