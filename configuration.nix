@@ -8,6 +8,7 @@
 
   environment.systemPackages = [
     pkgs.vim
+    pkgs.nano # replace default editor
   ];
 
   nix = {
