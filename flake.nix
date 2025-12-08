@@ -18,6 +18,10 @@
       url = "github:luisnquin/black-terminal";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    aerospace = {
+      url = "github:nikitabobko/AeroSpace";
+      flake = false;
+    };
   };
 
   outputs = {

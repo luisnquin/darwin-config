@@ -1,4 +1,5 @@
 {
+  inputs,
   config,
   pkgs,
   ...
@@ -26,6 +27,10 @@
   nix-homebrew = {
     enable = true;
     user = config.system.primaryUser;
+
+    taps = {
+      "nikitabobko/aerospace" = inputs.aerospace;
+    };
   };
 
   homebrew = {
@@ -35,9 +40,14 @@
       cleanup = "zap";
       upgrade = true;
     };
+
+    taps = [
+      "nikitabobko/tap"
+    ];
     casks = [
       "google-chrome"
       "autodesk-fusion"
+      "nikitabobko/tap/aerospace"
     ];
     masApps = {
       Xcode = 497799835;
