@@ -27,10 +27,6 @@
   nix-homebrew = {
     enable = true;
     user = config.system.primaryUser;
-
-    taps = {
-      "nikitabobko/aerospace" = inputs.aerospace;
-    };
   };
 
   homebrew = {
@@ -47,10 +43,34 @@
     casks = [
       "google-chrome"
       "autodesk-fusion"
-      "nikitabobko/tap/aerospace"
     ];
     masApps = {
       Xcode = 497799835;
+    };
+  };
+
+  services.aerospace = {
+    enable = true;
+
+    settings = {
+      start-at-login = false; # managed by hm
+
+      gaps = {
+        inner.horizontal = 8;
+        inner.vertical = 8;
+        outer.bottom = 5;
+        outer.top = [{monitor.main = 10;} 10];
+        outer.right = 5;
+        outer.left = 5;
+      };
+
+      mode.main.binding = {
+        alt-h = "focus left";
+        alt-j = "focus down";
+        alt-k = "focus up";
+        alt-l = "focus right";
+        alt-f = "fullscreen";
+      };
     };
   };
 
