@@ -1,4 +1,8 @@
-{pkgs, ...}: {
+{
+  config,
+  pkgs,
+  ...
+}: {
   programs.zen-browser.enable = true;
 
   home = {
@@ -8,6 +12,13 @@
   };
 
   nixpkgs.config.allowUnfree = true;
+
+  programs.password-store = {
+    enable = true;
+    settings = {
+      PASSWORD_STORE_DIR = "${config.home.homeDirectory}/.password-store";
+    };
+  };
 
   home = {
     packages = with pkgs; [
