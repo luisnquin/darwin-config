@@ -85,7 +85,7 @@
       {path = "/System/Applications/App Store.app";}
       {path = mkHomeAppPath "Zen Browser (Beta).app";}
       {path = "/Applications/Ghostty.app/";}
-      {path = mkHomeAppPath "Notion.app";}
+      {path = "/Applications/Notion.app";}
       {path = "/Applications/Google Chrome.app/";}
       {path = "/Users/${username}/Applications/Autodesk Fusion.app";}
     ];
