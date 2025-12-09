@@ -11,7 +11,6 @@
 
   home = {
     packages = with pkgs; [
-      notion-app
       alejandra
       nodejs
       bun

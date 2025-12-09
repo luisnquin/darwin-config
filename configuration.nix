@@ -6,9 +6,9 @@
 }: {
   imports = [./options.nix];
 
-  environment.systemPackages = [
-    pkgs.vim
-    pkgs.nano # replace default editor
+  environment.systemPackages = with pkgs; [
+    vim
+    nano # replace default editor
   ];
 
   nix = {
@@ -44,6 +44,7 @@
     casks = [
       "google-chrome"
       "autodesk-fusion"
+      "notion"
     ];
     masApps = {
       Xcode = 497799835;
