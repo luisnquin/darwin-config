@@ -36,6 +36,7 @@
     bat.enable = true;
     btop.enable = true;
     direnv.enable = true;
+    eza.enable = true;
     fzf.enable = true;
     macchina.enable = true;
     ghostty.enable = true;
@@ -49,6 +50,7 @@
     lazygit.enable = true;
     starship.enable = true;
     tmux.enable = true;
+    zoxide.enable = true;
     zsh.enable = true;
   };
 

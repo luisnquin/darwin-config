@@ -14,10 +14,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";
-    black-terminal = {
-      url = "github:luisnquin/black-terminal";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    black-terminal.url = "github:luisnquin/black-terminal";
   };
 
   outputs = {
