@@ -13,23 +13,27 @@
 
   nixpkgs.config.allowUnfree = true;
 
-  programs.password-store = {
-    enable = true;
-    settings = {
-      PASSWORD_STORE_DIR = "${config.home.homeDirectory}/.password-store";
+  shared = {
+    bat.enable = true;
+    btop.enable = true;
+    direnv.enable = true;
+    eza.enable = true;
+    fzf.enable = true;
+    macchina.enable = true;
+    ghostty.enable = true;
+    git = {
+      enable = true;
+      user = {
+        name = "Luis Quiñones Requelme";
+        email = "luis@quinones.pro";
+      };
     };
-  };
-
-  home = {
-    packages = with pkgs; [
-      alejandra
-      nodejs
-      bun
-    ];
-
-    shellAliases = {
-      "pr" = "cd ~/Projects";
-    };
+    lazygit.enable = true;
+    magic-wormhole.enable = true;
+    starship.enable = true;
+    tmux.enable = true;
+    zoxide.enable = true;
+    zsh.enable = true;
   };
 
   programs.openclaw = {
@@ -56,48 +60,43 @@
     };
   };
 
-  shared = {
-    bat.enable = true;
-    btop.enable = true;
-    direnv.enable = true;
-    eza.enable = true;
-    fzf.enable = true;
-    macchina.enable = true;
-    ghostty.enable = true;
-    git = {
-      enable = true;
-      user = {
-        name = "Luis Quiñones Requelme";
-        email = "luis@quinones.pro";
-      };
+  home = {
+    packages = [pkgs.alejandra]; # yes, her
+
+    shellAliases = {
+      "pr" = "cd ~/Projects";
     };
-    lazygit.enable = true;
-    magic-wormhole.enable = true;
-    starship.enable = true;
-    tmux.enable = true;
-    zoxide.enable = true;
-    zsh.enable = true;
   };
 
-  programs.fish = {
-    enable = true;
-    interactiveShellInit = ''
-      set fish_greeting # disable greeting
-    '';
-    plugins = [
-      {
-        name = "grc";
-        src = pkgs.fishPlugins.grc.src;
-      }
-      {
-        name = "fzf"; # Ctrl + R
-        src = pkgs.fishPlugins.fzf-fish.src;
-      }
-      {
-        name = "done";
-        src = pkgs.fishPlugins.done.src;
-      }
-    ];
+  programs = {
+    bun.enable = true;
+    fish = {
+      enable = true;
+      interactiveShellInit = ''
+        set fish_greeting # disable greeting
+      '';
+      plugins = [
+        {
+          name = "grc";
+          src = pkgs.fishPlugins.grc.src;
+        }
+        {
+          name = "fzf"; # Ctrl + R
+          src = pkgs.fishPlugins.fzf-fish.src;
+        }
+        {
+          name = "done";
+          src = pkgs.fishPlugins.done.src;
+        }
+      ];
+    };
+    npm.enable = true;
+    password-store = {
+      enable = true;
+      settings = {
+        PASSWORD_STORE_DIR = "${config.home.homeDirectory}/.password-store";
+      };
+    };
   };
 
   programs.vscode = {
