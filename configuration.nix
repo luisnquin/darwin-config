@@ -1,14 +1,5 @@
-{
-  config,
-  pkgs,
-  ...
-}: {
+{config, ...}: {
   imports = [./options.nix];
-
-  environment.systemPackages = with pkgs; [
-    vim
-    nano # replace default editor
-  ];
 
   nix = {
     enable = false;
@@ -20,7 +11,11 @@
     config.allowUnfree = true;
   };
 
-  programs.fish.enable = true;
+  programs = {
+    fish.enable = true;
+    nano.enable = true;
+    vim.enable = true;
+  };
   shared.aliases.enable = true;
   system.primaryUser = "luisnquin";
 
