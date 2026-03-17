@@ -15,6 +15,13 @@
     };
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";
     black-terminal.url = "github:luisnquin/black-terminal";
+    openclaw = {
+      url = "github:openclaw/nix-openclaw";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        home-manager.follows = "home-manager";
+      };
+    };
   };
 
   outputs = {
@@ -23,6 +30,7 @@
     nix-homebrew,
     zen-browser,
     nix-darwin,
+    openclaw,
     nixpkgs,
     self,
     ...
@@ -43,6 +51,7 @@
       modules = [
         black-terminal.homeModules.default
         zen-browser.homeModules.default
+        openclaw.homeModules.default
         ./home.nix
       ];
     };
