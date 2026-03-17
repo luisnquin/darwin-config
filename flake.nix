@@ -40,20 +40,25 @@
       modules = [
         black-terminal.darwinModules.default
         nix-homebrew.darwinModules.default
+        home-manager.nixosModules.default
+        {
+          home-manager = {
+            useGlobalPkgs = true;
+            useUserPackages = true;
+            extraSpecialArgs = {inherit inputs;};
+            users.luisnquin = {
+              imports = [
+                black-terminal.homeModules.default
+                zen-browser.homeModules.default
+                openclaw.homeModules.default
+                ./home.nix
+              ];
+            };
+          };
+        }
         ./configuration.nix
       ];
       specialArgs = {inherit inputs;};
-    };
-
-    homeConfigurations."luisnquin" = home-manager.lib.homeManagerConfiguration {
-      pkgs = nixpkgs.legacyPackages.aarch64-darwin;
-      extraSpecialArgs = {inherit inputs;};
-      modules = [
-        black-terminal.homeModules.default
-        zen-browser.homeModules.default
-        openclaw.homeModules.default
-        ./home.nix
-      ];
     };
   };
 }
