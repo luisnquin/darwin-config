@@ -8,7 +8,7 @@
   home = {
     stateVersion = "25.05";
     username = "luisnquin";
-    homeDirectory = "/Users/luisnquin";
+    homeDirectory = pkgs.lib.mkForce "/Users/luisnquin";
   };
 
   nixpkgs.config.allowUnfree = true;
