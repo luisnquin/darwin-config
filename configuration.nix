@@ -35,7 +35,12 @@
   services.openssh.enable = true;
 
   programs.fish.enable = true;
-  shared.aliases.enable = true;
+
+  shared = {
+    aliases.enable = true;
+    zsh.enable = true;
+  };
+
   system.primaryUser = "luisnquin";
 
   nix-homebrew = {
