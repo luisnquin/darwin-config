@@ -56,6 +56,13 @@
       bird.enable = false; # Twitter/X
       sonoscli.enable = false; # Sonos control
     };
+
+    instances.default = {
+      enable = true;
+      stateDir = "~/.openclaw";
+      workspaceDir = "~/.openclaw/workspace";
+      launchd.enable = true;
+    };
   };
 
   home = {
