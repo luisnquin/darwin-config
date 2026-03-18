@@ -1,4 +1,5 @@
 {
+  inputs,
   config,
   pkgs,
   ...
@@ -17,6 +18,9 @@
 
   nixpkgs = {
     hostPlatform = "aarch64-darwin";
+    overlays = [
+      inputs.openclaw.overlays.default
+    ];
     config.allowUnfree = true;
   };
 
