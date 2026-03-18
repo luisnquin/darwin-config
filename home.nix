@@ -88,7 +88,10 @@
         }
       ];
     };
-    npm.enable = true;
+    npm = {
+      enable = true;
+      package = pkgs.nodejs_22;
+    };
     password-store = {
       enable = true;
       settings = {
