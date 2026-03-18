@@ -40,7 +40,7 @@
       modules = [
         black-terminal.darwinModules.default
         nix-homebrew.darwinModules.default
-        home-manager.nixosModules.default
+        home-manager.darwinModules.default
         {
           home-manager = {
             useGlobalPkgs = true;
@@ -50,7 +50,7 @@
               imports = [
                 black-terminal.homeModules.default
                 zen-browser.homeModules.default
-                openclaw.homeModules.default
+                openclaw.homeManagerModules.openclaw
                 ./home.nix
               ];
             };
