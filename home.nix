@@ -11,8 +11,6 @@
     homeDirectory = pkgs.lib.mkForce "/Users/luisnquin";
   };
 
-  nixpkgs.config.allowUnfree = true;
-
   shared = {
     bat.enable = true;
     btop.enable = true;
