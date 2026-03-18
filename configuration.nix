@@ -6,6 +6,8 @@
 }: {
   imports = [./options.nix];
 
+  networking.hostName = "dyx";
+
   environment.systemPackages = with pkgs; [
     vim
     nano # replace default editor
