@@ -15,6 +15,10 @@
     };
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";
     black-terminal.url = "github:luisnquin/black-terminal";
+    senv = {
+      url = "github:luisnquin/senv";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     openclaw = {
       url = "github:openclaw/nix-openclaw";
       inputs = {

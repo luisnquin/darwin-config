@@ -214,7 +214,28 @@
         "nix-homebrew": "nix-homebrew",
         "nixpkgs": "nixpkgs",
         "openclaw": "openclaw",
+        "senv": "senv",
         "zen-browser": "zen-browser"
+      }
+    },
+    "senv": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1773937443,
+        "narHash": "sha256-CVNrVamKHCtvvi7F8X+hGVGXSZ625PSTLSWlbWh/B44=",
+        "owner": "luisnquin",
+        "repo": "senv",
+        "rev": "0016f0b84df6c33da9283b980b224eaa52199c96",
+        "type": "github"
+      },
+      "original": {
+        "owner": "luisnquin",
+        "repo": "senv",
+        "type": "github"
       }
     },
     "systems": {

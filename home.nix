@@ -1,4 +1,5 @@
 {
+  inputs,
   config,
   pkgs,
   ...
@@ -66,7 +67,10 @@
   };
 
   home = {
-    packages = [pkgs.alejandra]; # yes, her
+    packages = [
+      pkgs.alejandra
+      inputs.senv.packages.${pkgs.system}.default
+    ];
 
     shellAliases = {
       "pr" = "cd ~/Projects";
