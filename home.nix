@@ -69,7 +69,7 @@
   home = {
     packages = [
       pkgs.alejandra
-      inputs.senv.packages.${pkgs.system}.default
+      inputs.senv.packages.${pkgs.stdenv.hostPlatform.system}.default
     ];
 
     shellAliases = {
