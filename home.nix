@@ -101,7 +101,7 @@
     };
     npm = {
       enable = true;
-      package = pkgs.nodejs_22;
+      package = pkgs.hiPrio pkgs.nodejs_25;
     };
     password-store = {
       enable = true;
