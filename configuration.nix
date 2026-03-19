@@ -8,10 +8,16 @@
 
   networking.hostName = "dyx";
 
-  environment.systemPackages = with pkgs; [
-    vim
-    nano # replace default editor
-  ];
+  environment = {
+    systemPackages = with pkgs; [
+      vim
+      nano # replace default editor
+    ];
+
+    variables = {
+      LANG = "en_US.UTF-8";
+    };
+  };
 
   nix = {
     enable = false;
