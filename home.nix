@@ -28,6 +28,7 @@
       };
     };
     lazygit.enable = true;
+    less.enable = true;
     magic-wormhole.enable = true;
     starship.enable = true;
     tmux.enable = true;
