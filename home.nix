@@ -74,9 +74,10 @@
   };
 
   home = {
-    packages = [
-      pkgs.alejandra
-      inputs.senv.packages.${pkgs.stdenv.hostPlatform.system}.default
+    packages = with pkgs; [
+      alejandra
+      nixgrep
+      senv
     ];
 
     shellAliases = {
