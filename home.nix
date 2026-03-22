@@ -3,7 +3,10 @@
   pkgs,
   ...
 }: {
-  imports = [./options/hm/ollama.nix];
+  imports = [
+    ./options/hm/ollama.nix
+    ./options/hm/litellm.nix
+  ];
 
   programs.zen-browser.enable = true;
 
@@ -49,6 +52,35 @@
       "qwen3-coder:30b"
     ];
     syncModels = true;
+  };
+
+  services.litellm = {
+    enable = true;
+    port = 9898;
+
+    settings = {
+      model_list = [
+        {
+          model_name = "claude-3-5-sonnet";
+          litellm_params = {
+            model = "anthropic/claude-3-5-sonnet-20240620";
+            api_key = "os.environ/ANTHROPIC_API_KEY";
+          };
+        }
+        {
+          model_name = "qwen3-coder";
+          litellm_params = {
+            model = "ollama/qwen3-coder:30b";
+            api_base = "http://localhost:11434";
+          };
+        }
+      ];
+
+      litellm_settings = {
+        drop_params = true;
+        set_verbose = false;
+      };
+    };
   };
 
   programs.openclaw = {
