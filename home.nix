@@ -1,9 +1,10 @@
 {
-  inputs,
   config,
   pkgs,
   ...
 }: {
+  imports = [./options/hm/ollama.nix];
+
   programs.zen-browser.enable = true;
 
   home = {
@@ -40,6 +41,14 @@
     };
     zoxide.enable = true;
     zsh.enable = true;
+  };
+
+  services.ollama = {
+    enable = true;
+    loadModels = [
+      "qwen3-coder:30b"
+    ];
+    syncModels = true;
   };
 
   programs.openclaw = {

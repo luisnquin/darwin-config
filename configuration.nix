@@ -4,7 +4,7 @@
   pkgs,
   ...
 }: {
-  imports = [./options.nix];
+  imports = [./options/darwin/dock.nix];
 
   networking.hostName = "dyx";
 
