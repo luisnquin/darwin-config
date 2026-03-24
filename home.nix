@@ -56,9 +56,13 @@
 
   services.litellm = {
     enable = true;
-    port = 9898;
+    port = 4000; # expected
 
     settings = {
+      general_settings = {
+        master_key = "dummy";
+      };
+
       model_list = [
         {
           model_name = "claude-3-5-sonnet";
