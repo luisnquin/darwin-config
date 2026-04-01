@@ -49,7 +49,7 @@
   services.ollama = {
     enable = true;
     loadModels = [
-      "qwen3-coder:30b"
+      "slekrem/gpt-oss-claude-code-32k:20b"
     ];
     syncModels = true;
   };
