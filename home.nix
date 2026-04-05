@@ -94,7 +94,7 @@ in {
   };
 
   programs.openclaw = {
-    enable = true;
+    enable = false;
     config = {
       # TODO: set OPENCLAW_GATEWAY_TOKEN env var or try with agenix
       gateway.mode = "local";
