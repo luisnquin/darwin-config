@@ -169,41 +169,4 @@ in {
       };
     };
   };
-
-  programs.vscode = {
-    enable = true;
-    profiles.default = {
-      enableUpdateCheck = false;
-      userSettings = {
-        "files.autoDelay" = 100;
-        "files.autoSave" = "afterDelay";
-        "files.refactoring.autoSave" = true;
-        "[nix]"."editor.tabSize" = 2;
-        "workbench.iconTheme" = "vira-icons-deepforest";
-        "workbench.colorTheme" = "Vira Deepforest";
-        "workbench.sideBar.location" = "right";
-      };
-
-      extensions = with pkgs.vscode-extensions;
-        [
-          kamadorueda.alejandra
-          jnoortheen.nix-ide
-          usernamehw.errorlens
-        ]
-        ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace [
-          {
-            name = "Kilo-Code";
-            publisher = "kilocode";
-            version = "4.121.2";
-            sha256 = "sha256-pTCcZ+295f/I/sLileXYKtTQ2m11lR4RYhYoplk8Ing=";
-          }
-          # {
-          #   name = "vsc-vira-theme";
-          #   publisher = "vira";
-          #   version = "2025.10.4";
-          #   sha256 = "sha256-oM/r2RyblHeNg02yu2+lGzp44Z+vPR01QxY8ePvaTf4=";
-          # }
-        ];
-    };
-  };
 }
