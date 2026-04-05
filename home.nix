@@ -75,6 +75,7 @@ in {
 
   services.litellm = {
     enable = true;
+    host = "0.0.0.0";
     port = 4000;
 
     settings = {
