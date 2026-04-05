@@ -2,10 +2,29 @@
   config,
   pkgs,
   ...
-}: {
+}: let
+  ollamaApiBase = "http://${config.services.ollama.host}:${toString config.services.ollama.port}";
+  litellmOllamaModels =
+    map (model: {
+      model_name = model;
+      litellm_params = {
+        model = "ollama/${model}";
+        api_base = ollamaApiBase;
+      };
+    })
+    config.services.ollama.loadModels
+    ++ [
+      {
+        model_name = "ollama/*";
+        litellm_params = {
+          model = "ollama/*";
+          api_base = ollamaApiBase;
+        };
+      }
+    ];
+in {
   imports = [
-    ./options/hm/ollama.nix
-    ./options/hm/litellm.nix
+    ./options/hm
   ];
 
   programs.zen-browser.enable = true;
@@ -56,31 +75,17 @@
 
   services.litellm = {
     enable = true;
-    port = 4000; # expected
+    port = 4000;
 
     settings = {
+      model_list = litellmOllamaModels;
+
       general_settings = {
         master_key = "dummy";
       };
 
-      model_list = [
-        {
-          model_name = "claude-3-5-sonnet";
-          litellm_params = {
-            model = "anthropic/claude-3-5-sonnet-20240620";
-            api_key = "os.environ/ANTHROPIC_API_KEY";
-          };
-        }
-        {
-          model_name = "qwen3-coder";
-          litellm_params = {
-            model = "ollama/qwen3-coder:30b";
-            api_base = "http://localhost:11434";
-          };
-        }
-      ];
-
       litellm_settings = {
+        check_provider_endpoint = true;
         drop_params = true;
         set_verbose = false;
       };
