@@ -69,7 +69,7 @@
                 black-terminal.homeModules.default
                 zen-browser.homeModules.default
                 openclaw.homeManagerModules.openclaw
-                ./home.nix
+                ./home
               ];
             };
           };
