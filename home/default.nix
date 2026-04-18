@@ -35,13 +35,13 @@
     less.enable = true;
     magic-wormhole.enable = true;
     starship.enable = true;
-    tmux = {
-      enable = true;
-      theme = {
-        plugin = pkgs.tmuxPlugins.rose-pine;
-        extraConfig = "";
-      };
-    };
+    # tmux = {
+    #   enable = true;
+    #   theme = {
+    #     plugin = pkgs.tmuxPlugins.rose-pine;
+    #     extraConfig = "";
+    #   };
+    # };
     zoxide.enable = true;
     zsh.enable = true;
   };
