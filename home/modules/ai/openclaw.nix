@@ -12,8 +12,8 @@
     };
 
     bundledPlugins = {
-      summarize.enable = true; # Summarize web pages, PDFs, videos
-      peekaboo.enable = true; # Take screenshots
+      summarize.enable = false; # Summarize web pages, PDFs, videos
+      peekaboo.enable = false; # Take screenshots
       poltergeist.enable = false; # Control your macOS UI
       sag.enable = false; # Text-to-speech
       camsnap.enable = false; # Camera snapshots
@@ -23,7 +23,7 @@
     };
 
     instances.default = {
-      enable = true;
+      enable = false;
       stateDir = "~/.openclaw";
       workspaceDir = "~/.openclaw/workspace";
       launchd.enable = true;

@@ -6,7 +6,14 @@
 }: {
   imports = [./options/darwin/dock.nix];
 
-  networking.hostName = "dyx";
+  networking = {
+    hostName = "dyx";
+    knownNetworkServices = [
+      "Wi-Fi"
+      "Ethernet Adaptor"
+      "Thunderbolt Ethernet"
+    ];
+  };
 
   environment = {
     systemPackages = with pkgs; [
