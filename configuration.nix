@@ -48,6 +48,11 @@
     ];
   };
 
+  services.tailscale = {
+    enable = true;
+    overrideLocalDns = true;
+  };
+
   services.openssh = {
     enable = true;
     extraConfig = ''
