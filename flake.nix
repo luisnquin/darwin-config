@@ -6,6 +6,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     systems.url = "github:nix-systems/default";
+    flake-parts.url = "github:hercules-ci/flake-parts";
     nix-darwin = {
       url = "github:nix-darwin/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -34,38 +35,63 @@
 
   outputs = {
     black-terminal,
-    nixpkgs-extra,
+    flake-parts,
     home-manager,
     nix-homebrew,
     zen-browser,
     nix-darwin,
     nixpkgs,
     self,
+    systems,
     ...
-  } @ inputs: {
-    # $ darwin-rebuild build --flake .#dyx
-    darwinConfigurations."dyx" = nix-darwin.lib.darwinSystem {
-      modules = [
-        black-terminal.darwinModules.default
-        nix-homebrew.darwinModules.default
-        home-manager.darwinModules.default
-        {
-          home-manager = {
-            useGlobalPkgs = true;
-            useUserPackages = true;
-            extraSpecialArgs = {inherit inputs;};
-            users.luisnquin = {
-              imports = [
-                black-terminal.homeModules.default
-                zen-browser.homeModules.default
-                ./home
-              ];
-            };
+  } @ inputs: let
+    collectTopLevelModules = dir: let
+      entries = builtins.readDir dir;
+    in
+      nixpkgs.lib.concatLists (nixpkgs.lib.mapAttrsToList (
+          name: type: let
+            path = dir + "/${name}";
+          in
+            if type == "directory"
+            then collectTopLevelModules path
+            else if type == "regular" && nixpkgs.lib.hasSuffix ".nix" name && name != "flake.nix" && name != "default.nix"
+            then [path]
+            else []
+        )
+        entries);
+  in
+    flake-parts.lib.mkFlake {inherit inputs;} {
+      imports = [flake-parts.flakeModules.modules] ++ collectTopLevelModules ./modules;
+
+      config = {
+        systems = import systems;
+
+        flake = {
+          # $ darwin-rebuild build --flake .#dyx
+          darwinConfigurations."dyx" = nix-darwin.lib.darwinSystem {
+            modules = [
+              black-terminal.darwinModules.default
+              nix-homebrew.darwinModules.default
+              home-manager.darwinModules.default
+              {
+                home-manager = {
+                  useGlobalPkgs = true;
+                  useUserPackages = true;
+                  extraSpecialArgs = {inherit inputs;};
+                  users.luisnquin = {
+                    imports = [
+                      black-terminal.homeModules.default
+                      zen-browser.homeModules.default
+                      self.modules.homeManager.luisnquin
+                    ];
+                  };
+                };
+              }
+              self.modules.darwin.dyx
+            ];
+            specialArgs = {inherit inputs;};
           };
-        }
-        ./configuration.nix
-      ];
-      specialArgs = {inherit inputs;};
+        };
+      };
     };
-  };
 }
