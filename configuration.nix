@@ -40,7 +40,6 @@
   nixpkgs = {
     hostPlatform = "aarch64-darwin";
     overlays = [
-      inputs.openclaw.overlays.default
       inputs.nixpkgs-extra.overlays.default
       inputs.senv.overlays.default
       (import ./overlays/ollama.nix)

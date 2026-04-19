@@ -30,15 +30,6 @@
         systems.follows = "systems";
       };
     };
-    openclaw = {
-      url = "github:openclaw/nix-openclaw";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        home-manager.follows = "home-manager";
-        flake-utils.inputs.systems.follows = "systems";
-        nix-steipete-tools.inputs.nixpkgs.follows = "nixpkgs";
-      };
-    };
   };
 
   outputs = {
@@ -48,7 +39,6 @@
     nix-homebrew,
     zen-browser,
     nix-darwin,
-    openclaw,
     nixpkgs,
     self,
     ...
@@ -68,7 +58,6 @@
               imports = [
                 black-terminal.homeModules.default
                 zen-browser.homeModules.default
-                openclaw.homeManagerModules.openclaw
                 ./home
               ];
             };
