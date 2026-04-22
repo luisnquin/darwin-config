@@ -18,12 +18,7 @@
       ];
       casks = [
         "google-chrome"
-        "autodesk-fusion"
-        "notion"
       ];
-      # masApps = {
-      #   Xcode = 497799835;
-      # };
     };
   };
 }

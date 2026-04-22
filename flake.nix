@@ -11,18 +11,11 @@
       url = "github:nix-darwin/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    zen-browser = {
-      url = "github:0xc000022070/zen-browser-flake/beta";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        home-manager.follows = "home-manager";
-      };
-    };
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";
     black-terminal.url = "github:luisnquin/black-terminal";
     senv = {
       url = "github:luisnquin/senv";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs"; 
     };
     nixpkgs-extra = {
       url = "github:0xc000022070/nixpkgs-extra";
@@ -38,7 +31,6 @@
     flake-parts,
     home-manager,
     nix-homebrew,
-    zen-browser,
     nix-darwin,
     nixpkgs,
     self,
@@ -81,7 +73,6 @@
                   users.luisnquin = {
                     imports = [
                       black-terminal.homeModules.default
-                      zen-browser.homeModules.default
                       self.modules.homeManager.luisnquin
                     ];
                   };
