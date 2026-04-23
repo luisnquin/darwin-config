@@ -59,8 +59,8 @@
         systems = import systems;
 
         flake = {
-          # $ darwin-rebuild build --flake .#dyx
-          darwinConfigurations."dyx" = nix-darwin.lib.darwinSystem {
+          # $ darwin-rebuild build --flake .#rose
+          darwinConfigurations."rose" = nix-darwin.lib.darwinSystem {
             modules = [
               black-terminal.darwinModules.default
               nix-homebrew.darwinModules.default
@@ -78,7 +78,7 @@
                   };
                 };
               }
-              self.modules.darwin.dyx
+              self.modules.darwin.rose
             ];
             specialArgs = {inherit inputs;};
           };

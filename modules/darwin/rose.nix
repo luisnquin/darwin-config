@@ -1,5 +1,5 @@
 {inputs, ...}: {
-  flake.modules.darwin.dyx = {
+  flake.modules.darwin.rose = {
     imports = with inputs.self.modules.darwin; [
       dock
       dockOptions

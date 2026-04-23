@@ -1,7 +1,7 @@
 {
   flake.modules.darwin.networking = {
     networking = {
-      hostName = "dyx";
+      hostName = "rose";
       knownNetworkServices = [
         "Wi-Fi"
         "Ethernet Adaptor"

@@ -18,11 +18,11 @@
         };
 
         mac-local = {
-          hostname = "dyx.local";
+          hostname = "rose.local";
         };
 
         mac = {
-          hostname = "dyx";
+          hostname = "rose";
         };
       };
     };
