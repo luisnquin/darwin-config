@@ -7,7 +7,7 @@
         "com.apple.sound.beep.volume" = 0.0;
         "com.apple.sound.beep.feedback" = 0;
 
-        AppleInterfaceStyle = "Light";
+        AppleInterfaceStyle = null; # Light
         AppleMeasurementUnits = "Centimeters";
         AppleMetricUnits = 1;
         AppleTemperatureUnit = "Celsius";
