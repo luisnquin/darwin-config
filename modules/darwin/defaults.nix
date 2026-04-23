@@ -61,5 +61,16 @@
         "com.apple.sound.beep.sound" = null;
       };
     };
+
+    activationScripts.postUserActivation.text = ''
+      # Disable Siri services
+      launchctl disable "user/$UID/com.apple.assistantd" 2>/dev/null || true
+      launchctl disable "gui/$UID/com.apple.assistantd" 2>/dev/null || true
+      sudo launchctl disable "system/com.apple.assistantd" 2>/dev/null || true
+
+      launchctl disable "user/$UID/com.apple.Siri.agent" 2>/dev/null || true
+      launchctl disable "gui/$UID/com.apple.Siri.agent" 2>/dev/null || true
+      sudo launchctl disable "system/com.apple.Siri.agent" 2>/dev/null || true
+    '';
   };
 }
