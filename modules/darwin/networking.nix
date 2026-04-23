@@ -7,6 +7,12 @@
         "Ethernet Adaptor"
         "Thunderbolt Ethernet"
       ];
+
+      applicationFirewall = {
+        enable = true;
+        blockAllIncoming = false;
+        enableStealthMode = true;
+      };
     };
   };
 }
