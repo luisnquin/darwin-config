@@ -7,6 +7,7 @@
         "com.apple.sound.beep.volume" = 0.0;
         "com.apple.sound.beep.feedback" = 0;
 
+        AppleInterfaceStyle = "Light";
         AppleMeasurementUnits = "Centimeters";
         AppleMetricUnits = 1;
         AppleTemperatureUnit = "Celsius";
@@ -23,6 +24,11 @@
         NSAutomaticWindowAnimationsEnabled = false;
         NSWindowResizeTime = 0.1;
         NSDisableAutomaticTermination = true;
+      };
+
+      LaunchServices = {
+        # Whether to enable quarantine for downloaded applications
+        LSQuarantine = false;
       };
 
       finder = {
@@ -44,15 +50,39 @@
       };
 
       CustomUserPreferences = {
+        NSGlobalDomain = {
+          NSAutomaticCapitalizationEnabled = false;
+          NSAutomaticDashSubstitutionEnabled = false;
+          NSAutomaticPeriodSubstitutionEnabled = false;
+          NSAutomaticQuoteSubstitutionEnabled = false;
+          NSAutomaticSpellingCorrectionEnabled = false;
+          NSDocumentSaveNewDocumentsToCloud = false;
+        };
+        finder = {
+          ShowExternalHardDrivesOnDesktop = true;
+          ShowHardDrivesOnDesktop = true;
+          ShowMountedServersOnDesktop = true;
+          ShowRemovableMediaOnDesktop = true;
+          WarnOnEmptyTrash = false;
+          _FXShowPosixPathInTitle = true;
+          _FXSortFoldersFirst = true;
+        };
+
         "com.apple.desktopservices" = {
           DSDontWriteUSBStores = true;
           DSDontWriteNetworkStores = true;
+        };
+        "com.apple.systempreferences" = {
+          NSQuitAlwaysKeepsWindows = false;
         };
         "com.apple.screencapture" = {
           "disable-shadow" = true;
         };
         "com.apple.finder" = {
           DisableAllAnimations = true;
+        };
+        "com.apple.AdLib" = {
+          allowApplePersonalizedAdvertising = false;
         };
       };
 
