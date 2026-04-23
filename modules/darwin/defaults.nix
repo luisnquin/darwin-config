@@ -92,7 +92,7 @@
       };
     };
 
-    activationScripts.postUserActivation.text = ''
+    system.activationScripts.postUserActivation.text = ''
       # Disable Siri services
       launchctl disable "user/$UID/com.apple.assistantd" 2>/dev/null || true
       launchctl disable "gui/$UID/com.apple.assistantd" 2>/dev/null || true
