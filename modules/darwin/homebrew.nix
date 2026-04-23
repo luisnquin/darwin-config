@@ -16,9 +16,6 @@
       taps = [
         "nikitabobko/tap"
       ];
-      casks = [
-        "google-chrome"
-      ];
     };
   };
 }

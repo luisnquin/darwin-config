@@ -6,7 +6,6 @@
       entries = [
         {path = "/System/Applications/App Store.app";}
         {path = "/Applications/Ghostty.app/";}
-        {path = "/Applications/Google Chrome.app/";}
       ];
     };
   };

@@ -8,7 +8,7 @@
         "com.apple.sound.beep.feedback" = 0;
 
         AppleMeasurementUnits = "Centimeters";
-        AppleMetricUnits = true;
+        AppleMetricUnits = 1;
         AppleTemperatureUnit = "Celsius";
         AppleICUForce24HourTime = true;
         ApplePressAndHoldEnabled = false;
@@ -57,7 +57,7 @@
       };
 
       ".GlobalPreferences" = {
-        "com.apple.mouse.scaling" = 2;
+        # "com.apple.mouse.scaling" = 2;
         "com.apple.sound.beep.sound" = null;
       };
     };
