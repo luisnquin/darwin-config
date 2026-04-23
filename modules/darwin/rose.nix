@@ -5,6 +5,7 @@
       dockOptions
       environment
       fish
+      fonts
       homebrew
       networking
       nix
