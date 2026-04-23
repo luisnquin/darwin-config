@@ -13,6 +13,7 @@
       shared
       tailscale
       users
+      defaults
     ];
   };
 }
