@@ -1,5 +1,7 @@
 {
   flake.modules.homeManager.ssh = {
+    home.file.".ssh/known_hosts".force = true;
+
     programs.ssh = {
       enable = true;
       enableDefaultConfig = false;
