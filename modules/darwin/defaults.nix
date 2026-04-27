@@ -91,19 +91,5 @@
         "com.apple.sound.beep.sound" = null;
       };
     };
-
-    system.activationScripts.postActivation.text = ''
-      # Activation runs as root on current nix-darwin, so explicitly target the user session.
-      user_uid="$(id -u ${config.system.primaryUser})"
-
-      # Disable Siri services
-      sudo -u ${config.system.primaryUser} launchctl disable "user/$user_uid/com.apple.assistantd" 2>/dev/null || true
-      sudo -u ${config.system.primaryUser} launchctl disable "gui/$user_uid/com.apple.assistantd" 2>/dev/null || true
-      launchctl disable "system/com.apple.assistantd" 2>/dev/null || true
-
-      sudo -u ${config.system.primaryUser} launchctl disable "user/$user_uid/com.apple.Siri.agent" 2>/dev/null || true
-      sudo -u ${config.system.primaryUser} launchctl disable "gui/$user_uid/com.apple.Siri.agent" 2>/dev/null || true
-      launchctl disable "system/com.apple.Siri.agent" 2>/dev/null || true
-    '';
   };
 }
