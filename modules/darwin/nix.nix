@@ -1,8 +1,9 @@
 {inputs, ...}: {
-  flake.modules.darwin.nix = {
+  flake.modules.darwin.nix = {pkgs, ...}: {
     nix = {
-      enable = false;
+      enable = true;
       settings.experimental-features = "nix-command flakes";
+      package = pkgs.lix;
     };
 
     nixpkgs = {
