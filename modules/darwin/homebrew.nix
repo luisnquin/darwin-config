@@ -16,6 +16,10 @@
       taps = [
         "nikitabobko/tap"
       ];
+
+      casks = [
+        "ghostty"
+      ];
     };
   };
 }
