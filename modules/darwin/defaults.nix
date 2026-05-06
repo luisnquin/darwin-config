@@ -51,6 +51,7 @@
 
       CustomUserPreferences = {
         NSGlobalDomain = {
+          NSQuitAlwaysKeepsWindows = false;
           NSAutomaticCapitalizationEnabled = false;
           NSAutomaticDashSubstitutionEnabled = false;
           NSAutomaticPeriodSubstitutionEnabled = false;
@@ -71,9 +72,6 @@
         "com.apple.desktopservices" = {
           DSDontWriteUSBStores = true;
           DSDontWriteNetworkStores = true;
-        };
-        "com.apple.systempreferences" = {
-          NSQuitAlwaysKeepsWindows = false;
         };
         "com.apple.screencapture" = {
           "disable-shadow" = true;
