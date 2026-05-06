@@ -6,6 +6,13 @@
         plugin = pkgs.tmuxPlugins.rose-pine;
         extraConfig = "";
       };
+
+      status = {
+        ssh = false;
+        gpg = false;
+        lsyncd.enable = false;
+        gitmux = true;
+      };
     };
   };
 }
