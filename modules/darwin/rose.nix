@@ -7,6 +7,7 @@
       fish
       fonts
       homebrew
+      iphone
       networking
       nix
       openssh
