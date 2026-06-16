@@ -11,6 +11,7 @@
       overlays = [
         inputs.nixpkgs-extra.overlays.default
         inputs.senv.overlays.default
+        inputs.self.overlays.a2a-sdk
         inputs.self.overlays.pymobiledevice3
       ];
       config.allowUnfree = true;
