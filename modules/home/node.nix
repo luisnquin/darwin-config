@@ -5,7 +5,7 @@
 
       npm = {
         enable = true;
-        package = pkgs.lib.hiPrio pkgs.nodejs_25;
+        package = pkgs.lib.hiPrio pkgs.nodejs_26;
       };
     };
   };
