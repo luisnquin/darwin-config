@@ -11,9 +11,18 @@
     # capture screenshots without sudo.
     launchd.daemons.pymobiledevice-tunneld = {
       serviceConfig = {
-        ProgramArguments = ["${pymobiledevice3}/bin/pymobiledevice3" "remote" "tunneld"];
+        ProgramArguments = [
+          "/bin/sh"
+          "-c"
+          "exec ${pymobiledevice3}/bin/pymobiledevice3 remote tunneld"
+        ];
         RunAtLoad = true;
-        KeepAlive = true;
+        KeepAlive = {
+          Crashed = true;
+          SuccessfulExit = false;
+        };
+        StartInterval = 30;
+        ThrottleInterval = 10;
         StandardOutPath = "/var/log/pymobiledevice-tunneld.log";
         StandardErrorPath = "/var/log/pymobiledevice-tunneld.log";
       };
