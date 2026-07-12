@@ -8,6 +8,7 @@
       git
       knownHosts
       litellmOptions
+      macos
       node
       ollamaOptions
       packages
