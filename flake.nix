@@ -15,13 +15,20 @@
     black-terminal.url = "github:luisnquin/black-terminal";
     senv = {
       url = "github:luisnquin/senv";
-      inputs.nixpkgs.follows = "nixpkgs"; 
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     nixpkgs-extra = {
       url = "github:0xc000022070/nixpkgs-extra";
       inputs = {
         nixpkgs.follows = "nixpkgs";
         systems.follows = "systems";
+      };
+    };
+    zen-browser = {
+      url = "github:0xc000022070/zen-browser-flake";
+      inputs = {
+        home-manager.follows = "home-manager";
+        nixpkgs.follows = "nixpkgs";
       };
     };
   };
