@@ -5,6 +5,7 @@
       ++ (with inputs.self.modules.homeManager; [
         aiLiteLLM
         aiOllama
+        android
         browser
         cli
         fish

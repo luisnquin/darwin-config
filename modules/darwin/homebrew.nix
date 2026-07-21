@@ -18,6 +18,8 @@
       ];
 
       casks = [
+        "android-commandlinetools"
+        "android-studio"
         "ghostty"
       ];
     };
