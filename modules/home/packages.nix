@@ -4,6 +4,7 @@
       alejandra
       nixgrep
       senv
+      simdeck
     ];
   };
 }
