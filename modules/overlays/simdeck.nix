@@ -2,11 +2,21 @@
   flake.overlays.simdeck = final: prev: let
     version = "0.1.33";
 
-    src = final.fetchFromGitHub {
+    upstream = final.fetchFromGitHub {
       owner = "NativeScript";
       repo = "SimDeck";
       rev = "simdeck-v${version}";
       hash = "sha256-0x+DUKUR/WIujCpcXcoRRr8vmY2D7q62xSzoCZZ77K8=";
+    };
+
+    src = final.applyPatches {
+      name = "simdeck-source";
+      src = upstream;
+      patches = [
+        ./patches/batch-tap-positional-args.patch
+        ./patches/android-launch-and-buttons.patch
+        ./patches/terminate-command.patch
+      ];
     };
 
     # build.rs `-force_load`s a static x264. nixpkgs' `enableShared = false` is
@@ -26,7 +36,7 @@
       inherit version src;
 
       cargoLock.lockFile = "${src}/packages/server/Cargo.lock";
-      sourceRoot = "source/packages/server";
+      sourceRoot = "${src.name}/packages/server";
 
       nativeBuildInputs = [final.pkg-config];
       # XCWH264Encoder.m uses VideoToolbox keys absent from the default 14.4 SDK.
@@ -44,7 +54,7 @@
       pname = "simdeck-client";
       inherit version src;
 
-      sourceRoot = "source/packages/client";
+      sourceRoot = "${src.name}/packages/client";
       npmDepsHash = "sha256-MtpXAMK2rqUPD829fWDralP6AkizwhrKboYZB85l80M=";
 
       # build-client.sh overlays the debugger UI onto the Vite bundle, taking it
@@ -78,7 +88,7 @@
       pname = "simdeck-test";
       inherit version src;
 
-      sourceRoot = "source/packages/simdeck-test";
+      sourceRoot = "${src.name}/packages/simdeck-test";
       nativeBuildInputs = [final.typescript];
 
       preBuild = ''

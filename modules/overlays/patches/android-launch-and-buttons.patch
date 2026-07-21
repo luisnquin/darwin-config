@@ -1,0 +1,81 @@
+diff --git a/packages/server/src/android.rs b/packages/server/src/android.rs
+index ad90669..fb27693 100644
+--- a/packages/server/src/android.rs
++++ b/packages/server/src/android.rs
+@@ -395,7 +395,7 @@ impl AndroidBridge {
+             self.run_adb(["-s", &serial, "shell", "am", "start", "-n", package])?;
+             return Ok(());
+         }
+-        self.run_adb([
++        let implicit = self.run_adb([
+             "-s",
+             &serial,
+             "shell",
+@@ -407,10 +407,49 @@ impl AndroidBridge {
+             "android.intent.category.LAUNCHER",
+             "-p",
+             package,
+-        ])?;
++        ]);
++        match implicit {
++            Ok(_) => Ok(()),
++            // An implicit start only resolves against filters carrying
++            // CATEGORY_DEFAULT, which the stock Android Studio template omits.
++            // Launchers do not rely on it either: they resolve the component
++            // first and start it explicitly.
++            Err(error) => match self.resolve_launcher_component(&serial, package) {
++                Some(component) => {
++                    self.run_adb(["-s", &serial, "shell", "am", "start", "-n", &component])?;
++                    Ok(())
++                }
++                None => Err(error),
++            },
++        }
++    }
++
++    pub fn force_stop_package(&self, id: &str, package: &str) -> Result<(), AppError> {
++        let serial = self.serial_for_id(id)?;
++        let package = package.split('/').next().unwrap_or(package);
++        self.run_adb(["-s", &serial, "shell", "am", "force-stop", package])?;
+         Ok(())
+     }
+ 
++    fn resolve_launcher_component(&self, serial: &str, package: &str) -> Option<String> {
++        let output = self
++            .run_adb_shell(
++                serial,
++                &format!(
++                    "cmd package resolve-activity --brief -a android.intent.action.MAIN \
++                     -c android.intent.category.LAUNCHER {}",
++                    shell_quote(package)
++                ),
++            )
++            .ok()?;
++        output
++            .lines()
++            .rev()
++            .map(str::trim)
++            .find(|line| is_android_component_name(line))
++            .map(str::to_owned)
++    }
++
+     pub fn set_pasteboard_text(&self, id: &str, text: &str) -> Result<(), AppError> {
+         let serial = self.serial_for_id(id)?;
+         let output =
+@@ -571,6 +610,16 @@ impl AndroidBridge {
+                 self.run_adb(["-s", &serial, "shell", "input", "keyevent", "4"])?;
+                 Ok(())
+             }
++            "volume-up" | "volume-down" | "mute" => {
++                let serial = self.serial_for_id(id)?;
++                let key_code = match button {
++                    "volume-up" => "24",
++                    "volume-down" => "25",
++                    _ => "164",
++                };
++                self.run_adb(["-s", &serial, "shell", "input", "keyevent", key_code])?;
++                Ok(())
++            }
+             _ => Err(AppError::bad_request(format!(
+                 "Unsupported Android hardware button `{button}`."
+             ))),
