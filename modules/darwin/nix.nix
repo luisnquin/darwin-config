@@ -13,7 +13,7 @@
         inputs.senv.overlays.default
         inputs.self.overlays.a2a-sdk
         inputs.self.overlays.pymobiledevice3
-        inputs.self.overlays.simdeck
+        inputs.self.overlays.sickdeck
       ];
       config.allowUnfree = true;
     };

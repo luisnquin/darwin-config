@@ -16,7 +16,8 @@
         node
         ollamaOptions
         packages
-        simdeck
+        sickdeck
+        sickdeckOptions
         ssh
         tmux
         user

@@ -196,6 +196,7 @@
         "nixpkgs": "nixpkgs",
         "nixpkgs-extra": "nixpkgs-extra",
         "senv": "senv",
+        "sickdeck": "sickdeck",
         "systems": "systems",
         "zen-browser": "zen-browser"
       }
@@ -218,6 +219,22 @@
         "owner": "luisnquin",
         "repo": "senv",
         "type": "github"
+      }
+    },
+    "sickdeck": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1784767385,
+        "narHash": "sha256-iXwQJu/D65s1G193C/23dbmZL0nVOOcRKFC5vkz8B8U=",
+        "ref": "refs/heads/main",
+        "rev": "8aa8648d65b929e48effe46e443b357b5ace828f",
+        "revCount": 323,
+        "type": "git",
+        "url": "ssh://git@github.com/0xc000022070/sickdeck"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@github.com/0xc000022070/sickdeck"
       }
     },
     "systems": {

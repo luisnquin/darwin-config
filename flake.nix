@@ -24,6 +24,12 @@
         systems.follows = "systems";
       };
     };
+    # Private fork, so no fetchFromGitHub: the sandbox has no credentials.
+    # Eval-time git+ssh fetch uses the caller's key; flake.lock pins the rev.
+    sickdeck = {
+      url = "git+ssh://git@github.com/0xc000022070/sickdeck";
+      flake = false;
+    };
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
       inputs = {
