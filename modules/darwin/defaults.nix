@@ -90,8 +90,8 @@
       };
     };
 
-    system.activationScripts.postActivation.text = ''
-      su ${config.system.primaryUser} -c 'defaults -currentHost write com.apple.screensaver idleTime -int 0'
+    local.userActivation = ''
+      defaults -currentHost write com.apple.screensaver idleTime -int 0
     '';
   };
 }

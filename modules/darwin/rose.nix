@@ -14,6 +14,7 @@
       power
       shared
       tailscale
+      userActivation
       users
       defaults
     ];
