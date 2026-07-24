@@ -89,5 +89,9 @@
         "com.apple.sound.beep.sound" = null;
       };
     };
+
+    system.activationScripts.postActivation.text = ''
+      su ${config.system.primaryUser} -c 'defaults -currentHost write com.apple.screensaver idleTime -int 0'
+    '';
   };
 }
