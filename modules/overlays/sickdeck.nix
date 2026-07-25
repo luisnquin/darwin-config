@@ -126,8 +126,7 @@
         cp package.json LICENSE README.md "$root/"
         cp -R packages/cli/bin "$root/packages/cli/"
         cp -R scripts/experimental "$root/scripts/"
-        cp scripts/studio-host-provider.mjs scripts/studio-provider-bridge.mjs \
-          scripts/postinstall.mjs "$root/scripts/"
+        cp scripts/postinstall.mjs "$root/scripts/"
 
         cp -R ${client} "$root/packages/client/dist"
         cp -R ${sickdeckTest} "$root/packages/sickdeck-test/dist"
