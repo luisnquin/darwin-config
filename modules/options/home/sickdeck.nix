@@ -90,22 +90,22 @@
       home = {
         packages = [cfg.package];
 
-        # `~/.simdeck` is a protected token in the fork's rename pass — the
-        # state directory keeps the name existing state and upstream binaries
-        # use. The port is repeated here because the CLI falls back to it when
-        # no service is installed yet.
-        file.".simdeck/config.json".text = builtins.toJSON {
+        # The port is repeated here because the CLI falls back to it when no
+        # service is installed yet.
+        file.".sickdeck/config.json".text = builtins.toJSON {
           service = {inherit (cfg) port;};
         };
       };
 
       # The label is the one the binary itself manages, so `service status`,
-      # `kill` and `killall` still see this agent, and a service provisioned by
-      # an older binary is replaced rather than duplicated.
+      # `kill` and `killall` still see this agent. It no longer matches the
+      # label upstream binaries used, so an agent left behind by one is not
+      # replaced by this switch — bootout `org.nativescript.simdeck` once, or
+      # two services race for the port.
       launchd.agents.sickdeck = {
         enable = true;
         config = {
-          Label = "org.nativescript.simdeck";
+          Label = "io.github.0xc000022070.sickdeck";
           # No --access-token and no --pairing-code: in tailnet mode the server
           # generates neither, which is what makes a store-generated plist safe
           # to publish. The remaining flags mirror the ones the binary writes
@@ -136,10 +136,10 @@
           StandardErrorPath = "${cfg.logDir}/sickdeck.err.log";
           EnvironmentVariables =
             {
-              SIMDECK_AUTH = "tailnet";
-              SIMDECK_TAILNET_LOGINS = lib.concatStringsSep "," cfg.allowedLogins;
+              SICKDECK_AUTH = "tailnet";
+              SICKDECK_TAILNET_LOGINS = lib.concatStringsSep "," cfg.allowedLogins;
               # A launchd agent gets a minimal PATH, and tailscale is not on it.
-              SIMDECK_TAILSCALE_BINARY = tailscale;
+              SICKDECK_TAILSCALE_BINARY = tailscale;
             }
             // cfg.environment;
         };
