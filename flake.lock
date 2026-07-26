@@ -224,11 +224,11 @@
     "sickdeck": {
       "flake": false,
       "locked": {
-        "lastModified": 1785039656,
-        "narHash": "sha256-/zPKItIgK6skrAh7YSCCdSxomfFnxeV+12kekHXX7HE=",
+        "lastModified": 1785040017,
+        "narHash": "sha256-dEGhPsbkG1beNHt27qtDicF8LkXNl222QOZttke6hs4=",
         "ref": "refs/heads/main",
-        "rev": "825f6f2bd3e3e3fea7130837e28649ab7aa5739b",
-        "revCount": 339,
+        "rev": "23195e3f423cf4dd4fb4e40f4f02d59facbbd5ac",
+        "revCount": 340,
         "type": "git",
         "url": "ssh://git@github.com/0xc000022070/sickdeck"
       },
