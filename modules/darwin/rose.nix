@@ -8,6 +8,7 @@
       fonts
       homebrew
       iphone
+      minisim
       networking
       nix
       openssh
