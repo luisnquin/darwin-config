@@ -8,6 +8,7 @@
       fonts
       homebrew
       iphone
+      menuBar
       minisim
       networking
       nix
