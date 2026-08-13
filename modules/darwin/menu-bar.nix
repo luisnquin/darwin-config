@@ -19,8 +19,12 @@
       };
 
       CustomUserPreferences."com.apple.TextInputMenu" = {
-        visible = true;
+        visible = false;
       };
     };
+
+    local.userActivation = ''
+      defaults -currentHost write com.apple.controlcenter Spotlight -int 24
+    '';
   };
 }
