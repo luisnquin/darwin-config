@@ -27,13 +27,11 @@
     # Private fork, so no fetchFromGitHub: the sandbox has no credentials.
     # Eval-time git+ssh fetch uses the caller's key; flake.lock pins the rev.
     sickdeck = {
-      url = "git+ssh://git@github.com/0xc000022070/sickdeck";
+      url = "git+ssh://git@github.com/0xc000022070/deckhand";
       flake = false;
     };
-    # Same repo, the branch that carries only the device-driving half as a
-    # library. `phone` links it; nothing else here does.
     deckhand = {
-      url = "git+ssh://git@github.com/0xc000022070/sickdeck?ref=lib";
+      url = "git+ssh://git@github.com/0xc000022070/deckhand?ref=lib";
       flake = false;
     };
     zen-browser = {

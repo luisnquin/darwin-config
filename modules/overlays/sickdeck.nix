@@ -145,7 +145,7 @@
 
       meta = {
         description = "Drive iOS Simulators and Android emulators from an IDE or CLI";
-        homepage = "https://github.com/0xc000022070/sickdeck";
+        homepage = "https://github.com/0xc000022070/deckhand";
         license = final.lib.licenses.asl20;
         mainProgram = "sickdeck";
         platforms = ["aarch64-darwin"];
