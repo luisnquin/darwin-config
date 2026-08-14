@@ -12,6 +12,7 @@
         inputs.nixpkgs-extra.overlays.default
         inputs.senv.overlays.default
         inputs.self.overlays.a2a-sdk
+        inputs.self.overlays.phone
         inputs.self.overlays.pymobiledevice3
         inputs.self.overlays.sickdeck
       ];

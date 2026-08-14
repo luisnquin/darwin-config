@@ -32,6 +32,23 @@
         "type": "github"
       }
     },
+    "deckhand": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1786723062,
+        "narHash": "sha256-Mi65xWQqYvEZu+cR7IjAHqpc+aW1IrMk0N+Zu9P+nKY=",
+        "ref": "lib",
+        "rev": "53ac14350e3c7913a38635d40f9cfd6724d27f51",
+        "revCount": 2,
+        "type": "git",
+        "url": "ssh://git@github.com/0xc000022070/sickdeck"
+      },
+      "original": {
+        "ref": "lib",
+        "type": "git",
+        "url": "ssh://git@github.com/0xc000022070/sickdeck"
+      }
+    },
     "flake-parts": {
       "inputs": {
         "nixpkgs-lib": "nixpkgs-lib"
@@ -189,6 +206,7 @@
     "root": {
       "inputs": {
         "black-terminal": "black-terminal",
+        "deckhand": "deckhand",
         "flake-parts": "flake-parts",
         "home-manager": "home-manager",
         "nix-darwin": "nix-darwin",

@@ -1,0 +1,17 @@
+[package]
+name = "phone"
+version = "0.1.0"
+edition = "2021"
+
+# CoreSimulator is launchd and mach ports, so the half of `phone` that presses a
+# simulator can only run on the host that owns it. deckhand carries the private
+# frameworks; this is the verb surface over them.
+[dependencies]
+anyhow = "1"
+deckhand = { path = "../deckhand" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[profile.release]
+lto = true
+strip = true

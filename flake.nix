@@ -30,6 +30,12 @@
       url = "git+ssh://git@github.com/0xc000022070/sickdeck";
       flake = false;
     };
+    # Same repo, the branch that carries only the device-driving half as a
+    # library. `phone` links it; nothing else here does.
+    deckhand = {
+      url = "git+ssh://git@github.com/0xc000022070/sickdeck?ref=lib";
+      flake = false;
+    };
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
       inputs = {
