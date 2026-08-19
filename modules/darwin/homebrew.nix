@@ -29,7 +29,6 @@
         "android-commandlinetools"
         "android-studio"
         "ghostty"
-        "minisim"
       ];
     };
   };
