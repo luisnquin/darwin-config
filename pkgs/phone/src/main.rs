@@ -14,6 +14,7 @@ mod node;
 
 use std::io::Write as _;
 use std::process::ExitCode;
+use std::time::Duration;
 
 use anyhow::{anyhow, Result};
 use deckhand::accessibility::interactive_accessibility_snapshot;
@@ -28,12 +29,19 @@ usage: phone <verb> [args]
   size <udid>           the panel in points and its scale
   snapshot <udid>       the elements that can be read or pressed
   tap <udid> <x> <y>    a touch, in points
+  swipe <udid> <x1> <y1> <x2> <y2> [ms]
+                        a drag, in points; both ends alike is a long press
   text <udid> <string>  one key event per character
   key <udid> <name>     a named key or a hardware button
   shot <udid>           a PNG on stdout
 
 keys:    enter escape delete tab space up down left right
 buttons: home app-switcher lock power side siri volume-up volume-down keyboard";
+
+/// A drag is sent as a touch that moves, so it needs a rate: roughly a frame,
+/// which is what a finger on a panel produces.
+const STEP_MS: u64 = 16;
+const DEFAULT_SWIPE_MS: u64 = 300;
 
 /// USB HID keyboard usages, which is what deckhand takes on either backend: the
 /// Android side translates them to Android keycodes, the simulator side hands
@@ -127,6 +135,45 @@ fn run(args: &[String]) -> Result<()> {
             let session = bridge.create_input_session(udid)?;
 
             session.send_touch(x, y, "began")?;
+            session.send_touch(x, y, "ended")?;
+        }
+        "swipe" => {
+            let udid = udid(rest)?;
+            let from = (coordinate(rest, 1, "x1")?, coordinate(rest, 2, "y1")?);
+            let to = (coordinate(rest, 3, "x2")?, coordinate(rest, 4, "y2")?);
+
+            let ms: u64 = match rest.get(5) {
+                Some(value) => value.parse().map_err(|_| anyhow!("ms is not a number"))?,
+                None => DEFAULT_SWIPE_MS,
+            };
+
+            let size = bridge.display_size(udid)?;
+            let at = |(x, y): (f64, f64)| (x / size.width, y / size.height);
+
+            // Every phase rides one connection, as a tap does: a reconnect
+            // between them ends the gesture and starts another one. It is also
+            // what makes a hold work — the touch is down for as long as the
+            // moved events keep coming.
+            let session = bridge.create_input_session(udid)?;
+            let steps = (ms / STEP_MS).clamp(2, 120);
+            let (x, y) = at(from);
+
+            session.send_touch(x, y, "began")?;
+
+            for step in 1..=steps {
+                std::thread::sleep(Duration::from_millis(ms / steps));
+
+                let travelled = step as f64 / steps as f64;
+                let (x, y) = at((
+                    from.0 + (to.0 - from.0) * travelled,
+                    from.1 + (to.1 - from.1) * travelled,
+                ));
+
+                session.send_touch(x, y, "moved")?;
+            }
+
+            let (x, y) = at(to);
+
             session.send_touch(x, y, "ended")?;
         }
         "text" => {
