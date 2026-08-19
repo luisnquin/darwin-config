@@ -1,0 +1,86 @@
+diff --git a/MiniSim/Menu.swift b/MiniSim/Menu.swift
+index 99480b9..c34a5a5 100644
+--- a/MiniSim/Menu.swift
++++ b/MiniSim/Menu.swift
+@@ -234,9 +234,81 @@ class Menu: NSMenu {
+         menuItem.keyEquivalentModifierMask = device.platform == .android ? [.option] : [.command]
+         menuItem.submenu = buildSubMenu(for: device)
+         menuItem.state = device.booted ? .on : .off
++        // `title` stays the display name on purpose: it is the identity every
++        // lookup in this class keys on (getDeviceByName, removeMenuItems,
++        // safeInsertItem, assignKeyEquivalents). Only the rendering is replaced.
++        menuItem.attributedTitle = Menu.attributedTitle(for: device)
+         return menuItem
+     }
+ 
++    /// Splits a row into a device name and a dimmer detail line so the version
++    /// stops competing with the name for attention, the way `displayName` does
++    /// when it flattens both into "Name - (iOS 18.5)".
++    private static func attributedTitle(for device: Device) -> NSAttributedString {
++        let paragraph = NSMutableParagraphStyle()
++        paragraph.lineBreakMode = .byTruncatingTail
++        paragraph.lineSpacing = 1
++
++        let title = NSMutableAttributedString(
++            string: device.name,
++            attributes: [
++                .font: NSFont.menuFont(ofSize: 0),
++                .foregroundColor: NSColor.labelColor,
++                .paragraphStyle: paragraph
++            ]
++        )
++
++        let details = detailSegments(for: device)
++        guard !details.isEmpty else { return title }
++
++        let detailFont = NSFont.menuFont(ofSize: NSFont.smallSystemFontSize)
++        title.append(NSAttributedString(string: "\n", attributes: [.paragraphStyle: paragraph]))
++
++        for (index, segment) in details.enumerated() {
++            if index > 0 {
++                title.append(NSAttributedString(
++                    string: " \u{00B7} ",
++                    attributes: [
++                        .font: detailFont,
++                        .foregroundColor: NSColor.tertiaryLabelColor,
++                        .paragraphStyle: paragraph
++                    ]
++                ))
++            }
++
++            title.append(NSAttributedString(
++                string: segment.text,
++                attributes: [
++                    .font: detailFont,
++                    .foregroundColor: segment.color,
++                    .paragraphStyle: paragraph
++                ]
++            ))
++        }
++
++        return title
++    }
++
++    private static func detailSegments(for device: Device) -> [(text: String, color: NSColor)] {
++        var segments: [(text: String, color: NSColor)] = []
++
++        if device.booted {
++            segments.append((NSLocalizedString("Running", comment: ""), .systemGreen))
++        }
++
++        // simctl runtimes already arrive formatted as "iOS 18.5"; Android devices
++        // carry no version at all, so the connection kind is the only detail left.
++        if let version = device.version, !version.isEmpty {
++            segments.append((version, .secondaryLabelColor))
++        } else if device.type == .physical {
++            segments.append((NSLocalizedString("Physical device", comment: ""), .secondaryLabelColor))
++        } else {
++            segments.append((NSLocalizedString("Emulator", comment: ""), .secondaryLabelColor))
++        }
++
++        return segments
++    }
++
+     private func replaceMenuItem(at index: Int, with newItem: NSMenuItem) {
+         self.removeItem(at: index)
+         self.insertItem(newItem, at: index)

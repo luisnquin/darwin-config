@@ -1,0 +1,155 @@
+diff --git a/MiniSim/Extensions/NSMenuItem+ImageInit.swift b/MiniSim/Extensions/NSMenuItem+ImageInit.swift
+index 6d3fcfe..1a1eb2e 100644
+--- a/MiniSim/Extensions/NSMenuItem+ImageInit.swift
++++ b/MiniSim/Extensions/NSMenuItem+ImageInit.swift
+@@ -14,42 +14,54 @@ extension NSMenuItem {
+         keyEquivalent: String,
+         type: DeviceMenuItem,
+         deviceFamily: DeviceFamily? = nil,
++        platform: Platform? = nil,
+         image: NSImage? = nil
+     ) {
+         self.init(title: title, action: action, keyEquivalent: keyEquivalent)
+ 
+         if let image {
+             self.image = image
+-        } else if let deviceFamily {
+-            self.image = NSImage(
+-                systemSymbolName: deviceFamily.iconName,
++        } else {
++            let family = deviceFamily ?? DeviceFamily(fromDisplayName: title)
++            self.image = NSImage.deviceSymbol(
++                named: family.iconName,
++                tint: platform == .android ? .systemGreen : family.tint,
+                 accessibilityDescription: title
+             )
+-        } else {
+-            let imageName = self.getSystemImageFromName(name: title)
+-            self.image = NSImage(systemSymbolName: imageName, accessibilityDescription: title)
+         }
+ 
+         self.tag = type.rawValue
+     }
++}
+ 
+-    private func getSystemImageFromName(name: String) -> String {
+-        if name.contains("Apple TV") {
+-            return "appletv.fill"
+-        }
+-
+-        if name.contains("iPad") || name.contains("Tablet") {
+-            return "ipad.landscape"
+-        }
++extension NSImage {
++    /// The stock symbol renders well below the row's cap height, which is what
++    /// makes the device list read as cramped. 15pt fills the row without forcing
++    /// AppKit to grow it.
++    private static let deviceSymbolPointSize: CGFloat = 15
+ 
+-        if name.contains("Apple Watch") {
+-            return "applewatch"
+-        }
++    /// Builds a tinted, row-sized device glyph.
++    ///
++    /// `isTemplate` is deliberately left off: AppKit re-renders template images in
++    /// the menu's own monochrome label colour, which would throw the palette away.
++    static func deviceSymbol(
++        named symbolName: String,
++        tint: NSColor,
++        accessibilityDescription: String
++    ) -> NSImage? {
++        let configuration = NSImage.SymbolConfiguration(
++            pointSize: NSImage.deviceSymbolPointSize,
++            weight: .regular
++        )
++        .applying(NSImage.SymbolConfiguration(hierarchicalColor: tint))
+ 
+-        if name.contains("TV") {
+-            return "tv"
+-        }
++        let symbol = NSImage(
++            systemSymbolName: symbolName,
++            accessibilityDescription: accessibilityDescription
++        )?
++        .withSymbolConfiguration(configuration)
+ 
+-        return "iphone"
++        symbol?.isTemplate = false
++        return symbol
+     }
+ }
+diff --git a/MiniSim/Menu.swift b/MiniSim/Menu.swift
+index ba8c413..99480b9 100644
+--- a/MiniSim/Menu.swift
++++ b/MiniSim/Menu.swift
+@@ -226,7 +226,8 @@ class Menu: NSMenu {
+             action: #selector(deviceItemClick),
+             keyEquivalent: "",
+             type: device.platform == .ios ? .launchIOS : .launchAndroid,
+-            deviceFamily: device.deviceFamily
++            deviceFamily: device.deviceFamily,
++            platform: device.platform
+         )
+ 
+         menuItem.target = self
+diff --git a/MiniSim/Model/DeviceFamily.swift b/MiniSim/Model/DeviceFamily.swift
+index 8f4fd2b..00ba396 100644
+--- a/MiniSim/Model/DeviceFamily.swift
++++ b/MiniSim/Model/DeviceFamily.swift
+@@ -5,6 +5,7 @@
+ //  Created by Oskar Kwaśniewski on 17/01/2026.
+ //
+ 
++import AppKit
+ import Foundation
+ 
+ enum DeviceFamily: String, Codable {
+@@ -33,6 +34,27 @@ enum DeviceFamily: String, Codable {
+     }
+   }
+ 
++  /// Rendering colour for the row icon. Symbols are drawn tinted rather than as
++  /// templates so a family is recognisable before the label is read; the palette
++  /// follows Apple's own per-product accent so it stays legible on the menu's
++  /// translucent material in both appearances.
++  var tint: NSColor {
++    switch self {
++    case .iPhone:
++      return .systemBlue
++    case .iPad:
++      return .systemPurple
++    case .watch:
++      return .systemRed
++    case .tv:
++      return .systemIndigo
++    case .vision:
++      return .systemTeal
++    case .unknown:
++      return .systemGray
++    }
++  }
++
+   /// Parses `deviceTypeIdentifier` from simctl JSON output.
+   /// Example: `com.apple.CoreSimulator.SimDeviceType.iPhone-14-Pro`
+   init(fromDeviceTypeIdentifier identifier: String) {
+@@ -50,4 +72,20 @@ enum DeviceFamily: String, Codable {
+       self = .unknown
+     }
+   }
++
++  /// Physical iOS devices and every Android device reach the menu without a
++  /// family, so the marketing name is the only signal left to classify them.
++  init(fromDisplayName name: String) {
++    if name.contains("Apple TV") || name.contains("TV") {
++      self = .tv
++    } else if name.contains("iPad") || name.contains("Tablet") {
++      self = .iPad
++    } else if name.contains("Apple Watch") {
++      self = .watch
++    } else if name.contains("Vision") {
++      self = .vision
++    } else {
++      self = .iPhone
++    }
++  }
+ }
