@@ -1,0 +1,31 @@
+--- a/lix/libstore/build/local-derivation-goal.cc
++++ b/lix/libstore/build/local-derivation-goal.cc
+@@ -488,8 +488,9 @@
+     // permissions of their own build directory. Unsandboxed builds
+     // disable this, but have no isolation by design anyway. The
+     // minimal sandbox (applied even when `sandbox = false`, though not
+-    // when `_NIX_TEST_NO_SANDBOX` is set) prevents the creation of
+-    // `set{u,g}id` files regardless.
++    // when `_NIX_TEST_NO_SANDBOX` is set or the derivation opted out
++    // with `__noChroot`) prevents the creation of `set{u,g}id` files
++    // regardless.
+     tmpDir = tmpDirRoot;
+     tmpDirFd = std::move(tmpDirRootFd);
+ #else
+@@ -1604,7 +1605,15 @@
+         /* They don't like trailing slashes on subpath directives */
+         if (globalTmpDir.back() == '/') globalTmpDir.pop_back();
+ 
+-        if (getEnv("_NIX_TEST_NO_SANDBOX") != "1") {
++        /* A derivation that asked not to be sandboxed gets no profile at all,
++           not even the minimal one. macOS refuses to apply a second profile on
++           top of an existing one, so any builder that sandboxes itself -- SwiftPM
++           compiling a remote Package.swift, for one -- dies on `sandbox_apply`
++           inside a build that is nominally unsandboxed. The only rule given up
++           is `deny file-write-setugid`; there is no isolation left to lose. */
++        bool noSandbox = !useChroot && parsedDrv->getBoolAttr("__noChroot");
++
++        if (getEnv("_NIX_TEST_NO_SANDBOX") != "1" && !noSandbox) {
+             Strings sandboxArgs;
+             sandboxArgs.push_back("_NIX_BUILD_TOP");
+             sandboxArgs.push_back(tmpDir);
