@@ -1,0 +1,205 @@
+diff --git a/MiniSim/MenuItems/SubMenuItem.swift b/MiniSim/MenuItems/SubMenuItem.swift
+index 3225868..ef5898f 100644
+--- a/MiniSim/MenuItems/SubMenuItem.swift
++++ b/MiniSim/MenuItems/SubMenuItem.swift
+@@ -42,6 +42,8 @@ enum SubMenuItems {
+         case logcat
+         case upload
+         case localFiles
++        case shutdown
++        case erase
+         case customCommand = 200
+     }
+ 
+@@ -166,14 +168,29 @@ enum SubMenuItems {
+         )
+     }
+ 
+-    struct Delete: SubMenuActionItem {
+-        let title = NSLocalizedString("Delete simulator", comment: "")
+-        let tag = Tags.delete.rawValue
++    struct Shutdown: SubMenuActionItem {
++        let title = NSLocalizedString("Shutdown", comment: "")
++        let tag = Tags.shutdown.rawValue
++        let bootsDevice = false
++        let needBootedDevice = true
++        let image = NSImage(
++            systemSymbolName: "power",
++            accessibilityDescription: "Shutdown"
++        )
++    }
++
++    struct Erase: SubMenuActionItem {
++        let title = NSLocalizedString("Erase content and settings", comment: "")
++        let tag = Tags.erase.rawValue
+         let bootsDevice = false
+         let needBootedDevice = false
+         let image = NSImage(
+-            systemSymbolName: "trash",
+-            accessibilityDescription: "Delete simulator"
++            systemSymbolName: "arrow.counterclockwise",
++            accessibilityDescription: "Erase content and settings"
++        )
++        let toolTip: String? = NSLocalizedString(
++            "Restores the simulator to a factory state, discarding installed apps and their data",
++            comment: ""
+         )
+     }
+ 
+@@ -215,16 +232,11 @@ extension SubMenuItems {
+ 
+         Separator(),
+ 
+-        SectionTitle(
+-            title: NSLocalizedString("Local Files", comment: ""),
+-            needBootedDevice: true
+-        ),
+-        UploadToFiles(),
+-        LocalFiles(),
++        Shutdown(),
+ 
+         Separator(),
+ 
+-        Delete()
++        Erase()
+       ]
+     case (.android, .physical):
+       return [
+diff --git a/MiniSim/Service/ActionFactory.swift b/MiniSim/Service/ActionFactory.swift
+index 6b67472..3a6ed87 100644
+--- a/MiniSim/Service/ActionFactory.swift
++++ b/MiniSim/Service/ActionFactory.swift
+@@ -30,6 +30,8 @@ class AndroidActionFactory: ActionFactory {
+       return CustomCommandAction(device: device, itemName: itemName)
+     case .logcat:
+       return LaunchLogCat(device: device)
++    case .shutdown, .erase:
++      return UnsupportedAction(message: "Shutdown and erase are only available for iOS simulators.")
+     }
+   }
+ }
+@@ -49,8 +51,14 @@ class IOSActionFactory: ActionFactory {
+       return CustomCommandAction(device: device, itemName: itemName)
+     case .coldBoot:
+       return ColdBootCommand(device: device)
++    // No menu item carries this tag any more, but ExecuteCommand feeds
++    // arbitrary tags in from AppleScript and an unhandled one is a fatalError.
+     case .delete:
+       return DeleteAction(device: device, skipConfirmation: skipConfirmation)
++    case .shutdown:
++      return ShutdownAction(device: device)
++    case .erase:
++      return EraseAction(device: device, skipConfirmation: skipConfirmation)
+     default:
+       fatalError("Unhandled action tag: \(tag)")
+     }
+diff --git a/MiniSim/Service/Actions.swift b/MiniSim/Service/Actions.swift
+index 2781d8c..46b1dd4 100644
+--- a/MiniSim/Service/Actions.swift
++++ b/MiniSim/Service/Actions.swift
+@@ -244,6 +244,43 @@ class ToggleA11yCommand: Action {
+   }
+ }
+ 
++// MARK: iOS Simulator Power Actions
++
++class ShutdownAction: Action {
++  let device: Device
++
++  init(device: Device) {
++    self.device = device
++  }
++
++  func execute() throws {
++    try device.shutdown()
++  }
++}
++
++class EraseAction: Action {
++  let device: Device
++  let skipConfirmation: Bool
++
++  init(device: Device, skipConfirmation: Bool = false) {
++    self.device = device
++    self.skipConfirmation = skipConfirmation
++  }
++
++  func showQuestionDialog() -> Bool {
++    guard !skipConfirmation else { return false }
++    return !NSAlert.showQuestionDialog(
++      title: "Are you sure?",
++      message: "Erasing returns this simulator to a factory state. Installed apps and their data are lost."
++    )
++  }
++
++  func execute() throws {
++    try device.erase()
++    MiniSim.showSuccessMessage(title: "Simulator erased!", message: device.name)
++  }
++}
++
+ // MARK: iOS Simulator Files Actions
+ 
+ enum SimulatorFilesError: Error {
+diff --git a/MiniSim/Service/DeviceService.swift b/MiniSim/Service/DeviceService.swift
+index af022f5..7f0cd26 100644
+--- a/MiniSim/Service/DeviceService.swift
++++ b/MiniSim/Service/DeviceService.swift
+@@ -27,6 +27,25 @@ extension Device {
+   func launch(additionalArgs: [String] = []) throws {
+     try deviceService.launchDevice(additionalArgs: additionalArgs)
+   }
++
++  func shutdown() throws {
++    try simulatorService().shutdownDevice()
++  }
++
++  func erase() throws {
++    try simulatorService().eraseDevice()
++  }
++
++  // Powering a device off and wiping it are simctl-only, so they stay off
++  // DeviceServiceCommon rather than forcing an unsupported android branch.
++  private func simulatorService() throws -> IOSDeviceService {
++    guard let service = deviceService as? IOSDeviceService else {
++      throw UnsupportedActionError(
++        message: NSLocalizedString("This action is only available for iOS simulators.", comment: "")
++      )
++    }
++    return service
++  }
+ }
+ 
+ extension DeviceServiceCommon {
+diff --git a/MiniSim/Service/IOSDeviceService.swift b/MiniSim/Service/IOSDeviceService.swift
+index 4be3ab0..e80dc62 100644
+--- a/MiniSim/Service/IOSDeviceService.swift
++++ b/MiniSim/Service/IOSDeviceService.swift
+@@ -15,6 +15,27 @@ class IOSDeviceService: DeviceServiceCommon {
+     }
+   }
+ 
++  func shutdownDevice() throws {
++    Thread.assertBackgroundThread()
++    guard let uuid = device.identifier else { return }
++    try shell.execute(
++      command: DeviceConstants.ProcessPaths.xcrun.rawValue,
++      arguments: ["simctl", "shutdown", uuid]
++    )
++  }
++
++  func eraseDevice() throws {
++    Thread.assertBackgroundThread()
++    guard let uuid = device.identifier else { return }
++    // simctl refuses to erase a device that is not shut down. Shutting one down
++    // that already is refuses in turn, and neither refusal matters here.
++    try? shutdownDevice()
++    try shell.execute(
++      command: DeviceConstants.ProcessPaths.xcrun.rawValue,
++      arguments: ["simctl", "erase", uuid]
++    )
++  }
++
+   func launchDevice(additionalArgs: [String]) throws {
+     Thread.assertBackgroundThread()
+     do {
