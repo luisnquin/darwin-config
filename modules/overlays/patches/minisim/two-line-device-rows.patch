@@ -2,14 +2,17 @@ diff --git a/MiniSim/Menu.swift b/MiniSim/Menu.swift
 index 99480b9..c34a5a5 100644
 --- a/MiniSim/Menu.swift
 +++ b/MiniSim/Menu.swift
-@@ -234,9 +234,81 @@ class Menu: NSMenu {
+@@ -234,9 +234,84 @@ class Menu: NSMenu {
          menuItem.keyEquivalentModifierMask = device.platform == .android ? [.option] : [.command]
          menuItem.submenu = buildSubMenu(for: device)
          menuItem.state = device.booted ? .on : .off
-+        // `title` stays the display name on purpose: it is the identity every
-+        // lookup in this class keys on (getDeviceByName, removeMenuItems,
-+        // safeInsertItem, assignKeyEquivalents). Only the rendering is replaced.
++        // Assigning `attributedTitle` overwrites `title` with its plain string,
++        // and `title` is the identity every lookup in this class keys on
++        // (getDeviceByName, removeMenuItems, safeInsertItem,
++        // assignKeyEquivalents), so it is restored right after. The reverse
++        // does not hold: setting `title` leaves the attributed string standing.
 +        menuItem.attributedTitle = Menu.attributedTitle(for: device)
++        menuItem.title = device.displayName
          return menuItem
      }
  
