@@ -32,23 +32,6 @@
         "type": "github"
       }
     },
-    "deckhand": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1786723062,
-        "narHash": "sha256-Mi65xWQqYvEZu+cR7IjAHqpc+aW1IrMk0N+Zu9P+nKY=",
-        "ref": "lib",
-        "rev": "53ac14350e3c7913a38635d40f9cfd6724d27f51",
-        "revCount": 2,
-        "type": "git",
-        "url": "ssh://git@github.com/0xc000022070/deckhand"
-      },
-      "original": {
-        "ref": "lib",
-        "type": "git",
-        "url": "ssh://git@github.com/0xc000022070/deckhand"
-      }
-    },
     "flake-parts": {
       "inputs": {
         "nixpkgs-lib": "nixpkgs-lib"
@@ -148,6 +131,28 @@
         "type": "github"
       }
     },
+    "nixos-config-pkgs": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "dir": "pkgs",
+        "lastModified": 1787274767,
+        "narHash": "sha256-IjXnalaYIITqk+qL+FTUXVAz1cbp+0YZHlv3/s+aadg=",
+        "owner": "luisnquin",
+        "repo": "nixos-config",
+        "rev": "8f61f02589971a000562396ee617fbce17488b6d",
+        "type": "github"
+      },
+      "original": {
+        "dir": "pkgs",
+        "owner": "luisnquin",
+        "repo": "nixos-config",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1781074563,
@@ -206,11 +211,11 @@
     "root": {
       "inputs": {
         "black-terminal": "black-terminal",
-        "deckhand": "deckhand",
         "flake-parts": "flake-parts",
         "home-manager": "home-manager",
         "nix-darwin": "nix-darwin",
         "nix-homebrew": "nix-homebrew",
+        "nixos-config-pkgs": "nixos-config-pkgs",
         "nixpkgs": "nixpkgs",
         "nixpkgs-extra": "nixpkgs-extra",
         "senv": "senv",

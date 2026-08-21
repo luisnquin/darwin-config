@@ -17,6 +17,10 @@
       url = "github:luisnquin/senv";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nixos-config-pkgs = {
+      url = "github:luisnquin/nixos-config?dir=pkgs";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     nixpkgs-extra = {
       url = "github:0xc000022070/nixpkgs-extra";
       inputs = {
@@ -28,10 +32,6 @@
     # Eval-time git+ssh fetch uses the caller's key; flake.lock pins the rev.
     sickdeck = {
       url = "git+ssh://git@github.com/0xc000022070/deckhand";
-      flake = false;
-    };
-    deckhand = {
-      url = "git+ssh://git@github.com/0xc000022070/deckhand?ref=lib";
       flake = false;
     };
     zen-browser = {

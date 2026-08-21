@@ -1,7 +1,2 @@
 .claude/
 target/
-
-# Dev-only symlink to a deckhand checkout, so `cargo build` in pkgs/phone
-# resolves its path dependency. The nix build takes the library from the flake
-# input instead.
-/pkgs/deckhand

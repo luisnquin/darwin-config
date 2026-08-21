@@ -3,7 +3,7 @@
     home.packages = with pkgs; [
       alejandra
       nixgrep
-      phone
+      phone.receiver
       senv
     ];
   };
