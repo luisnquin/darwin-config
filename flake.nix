@@ -13,10 +13,6 @@
     };
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";
     black-terminal.url = "github:luisnquin/black-terminal";
-    senv = {
-      url = "github:luisnquin/senv";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     nixos-config-pkgs = {
       url = "github:luisnquin/nixos-config?dir=pkgs";
       inputs.nixpkgs.follows = "nixpkgs";
