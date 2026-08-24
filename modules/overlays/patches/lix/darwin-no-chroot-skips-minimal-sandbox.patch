@@ -1,31 +1,65 @@
 --- a/lix/libstore/build/local-derivation-goal.cc
 +++ b/lix/libstore/build/local-derivation-goal.cc
-@@ -488,8 +488,9 @@
+@@ -549,7 +549,8 @@
      // permissions of their own build directory. Unsandboxed builds
      // disable this, but have no isolation by design anyway. The
      // minimal sandbox (applied even when `sandbox = false`, though not
 -    // when `_NIX_TEST_NO_SANDBOX` is set) prevents the creation of
--    // `set{u,g}id` files regardless.
 +    // when `_NIX_TEST_NO_SANDBOX` is set or the derivation opted out
-+    // with `__noChroot`) prevents the creation of `set{u,g}id` files
-+    // regardless.
++    // with `__noChroot`) prevents the creation of
+     // `set{u,g}id` files regardless.
      tmpDir = tmpDirRoot;
      tmpDirFd = std::move(tmpDirRootFd);
- #else
-@@ -1604,7 +1605,15 @@
-         /* They don't like trailing slashes on subpath directives */
-         if (globalTmpDir.back() == '/') globalTmpDir.pop_back();
+--- a/lix/libstore/platform/darwin.cc
++++ b/lix/libstore/platform/darwin.cc
+@@ -254,8 +254,17 @@
+ {
+     auto config = request.getPlatform().initDarwin();
  
--        if (getEnv("_NIX_TEST_NO_SANDBOX") != "1") {
-+        /* A derivation that asked not to be sandboxed gets no profile at all,
-+           not even the minimal one. macOS refuses to apply a second profile on
-+           top of an existing one, so any builder that sandboxes itself -- SwiftPM
-+           compiling a remote Package.swift, for one -- dies on `sandbox_apply`
-+           inside a build that is nominally unsandboxed. The only rule given up
-+           is `deny file-write-setugid`; there is no isolation left to lose. */
-+        bool noSandbox = !useChroot && parsedDrv->getBoolAttr("__noChroot");
++    /* A derivation that asked not to be sandboxed gets no profile at all, not
++       even the minimal one. macOS refuses to apply a second profile on top of
++       an existing one, so any builder that sandboxes itself -- SwiftPM
++       compiling a remote Package.swift, for one -- dies on `sandbox_apply`
++       inside a build that is nominally unsandboxed. The only rule given up is
++       `deny file-write-setugid`; there is no isolation left to lose. An empty
++       profile is the signal the builder launcher checks for. */
++    const bool noSandbox = !useChroot && parsedDrv->getBoolAttr("__noChroot");
 +
-+        if (getEnv("_NIX_TEST_NO_SANDBOX") != "1" && !noSandbox) {
-             Strings sandboxArgs;
-             sandboxArgs.push_back("_NIX_BUILD_TOP");
-             sandboxArgs.push_back(tmpDir);
+     /* This has to appear before import statements. */
+-    std::string sandboxProfile = "(version 1)\n";
++    std::string sandboxProfile = noSandbox ? "" : "(version 1)\n";
+ 
+     if (useChroot) {
+ 
+@@ -360,7 +369,7 @@
+         sandboxProfile += ")\n";
+ 
+         sandboxProfile += additionalSandboxProfile;
+-    } else {
++    } else if (!noSandbox) {
+         sandboxProfile +=
+ #include "sandbox-minimal.sb"
+             ;
+--- a/lix/libexec/launch-builder-darwin.cc
++++ b/lix/libexec/launch-builder-darwin.cc
+@@ -33,7 +33,19 @@
+         globalTmpDir.pop_back();
+     }
+ 
+-    if (auto env = getenv("_NIX_TEST_NO_SANDBOX"); env && env != std::string_view("1")) {
++    /* An empty profile means the daemon decided this derivation gets none at
++       all (`__noChroot`); `sandbox_init_with_parameters` would reject it. */
++    if (config.getSandboxProfile().size() == 0) {
++        return;
++    }
++
++    /* 2.95 rewrote this guard from `getEnv(...) != "1"` over an
++       `optional<string>`, true when the variable was unset, into one that
++       requires it to be set -- which leaves every darwin build unsandboxed by
++       default. Restore the 2.94 meaning so the `__noChroot` opt-out above is
++       what actually decides who gets a profile. */
++    const auto testNoSandbox = getenv("_NIX_TEST_NO_SANDBOX");
++    if (testNoSandbox == nullptr || testNoSandbox != std::string_view("1")) {
+         std::vector<const char *> sandboxArgs;
+         sandboxArgs.push_back("_NIX_BUILD_TOP");
+         sandboxArgs.push_back(config.getTempDir().cStr());
