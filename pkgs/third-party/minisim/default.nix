@@ -169,7 +169,7 @@
 
     outputHashMode = "recursive";
     outputHashAlgo = "sha256";
-    outputHash = "sha256-SP+Of9Gzcrp8ChDGFWraqC98+6RAU41v7CIgEViBrtQ=";
+    outputHash = "sha256-hiysyBSycbDsv1LGt00zRtP1Vmf+FIgC6X5b39U1+6o=";
   };
 in
   stdenvNoCC.mkDerivation {
