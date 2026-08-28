@@ -3,6 +3,7 @@
   git,
   jq,
   lib,
+  librsvg,
   stdenvNoCC,
   unzip,
   # Xcode is not in nixpkgs and cannot be, so the toolchain is taken from the
@@ -177,7 +178,14 @@ in
 
     # SwiftPM shells out to unzip for the Sparkle and SwiftLint artifact bundles
     # and reports "could not find executable for 'unzip'" without it on PATH.
-    nativeBuildInputs = [unzip];
+    nativeBuildInputs = [librsvg unzip];
+
+    # The stock menu bar glyph is a filled slab; this outline replaces it. The
+    # asset is a template image, so only the alpha channel matters.
+    postPatch = ''
+      rsvg-convert -w 22 -h 38 ${./menubar-iphone.svg} \
+        -o MiniSim/Assets.xcassets/iphone.imageset/iphone@2x.png
+    '';
 
     # xcodebuild signs the bundle itself, and darwin's fixupPhase would then
     # rewrite the Mach-O headers behind its back and break the seal.
