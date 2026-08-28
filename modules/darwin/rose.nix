@@ -14,6 +14,7 @@
       nix
       openssh
       power
+      roomy
       shared
       tailscale
       userActivation

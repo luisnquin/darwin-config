@@ -4,6 +4,7 @@
       enable = true;
       settings.experimental-features = "nix-command flakes";
       package = pkgs.lix;
+      optimise.automatic = true;
     };
 
     nixpkgs = {
@@ -14,6 +15,7 @@
         inputs.self.overlays.minisim
         inputs.self.overlays.phone
         inputs.self.overlays.pymobiledevice3
+        inputs.self.overlays.roomy
         inputs.self.overlays.sickdeck
       ];
       config.allowUnfree = true;
