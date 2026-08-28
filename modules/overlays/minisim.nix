@@ -9,6 +9,7 @@
           ./patches/minisim/colored-device-icons.patch
           ./patches/minisim/two-line-device-rows.patch
           ./patches/minisim/shutdown-and-erase.patch
+          ./patches/minisim/menubar-booted-count.patch
         ];
     });
   };

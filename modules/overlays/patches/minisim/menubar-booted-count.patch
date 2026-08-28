@@ -1,0 +1,174 @@
+diff --git a/MiniSim/Extensions/NSNotificationName.swift b/MiniSim/Extensions/NSNotificationName.swift
+index 25f334b..5389ca7 100644
+--- a/MiniSim/Extensions/NSNotificationName.swift
++++ b/MiniSim/Extensions/NSNotificationName.swift
+@@ -12,4 +12,5 @@ extension Notification.Name {
+     static let menuDidClose = Notification.Name("menuDidClose")
+     static let deviceDeleted = Notification.Name("deviceDeleted")
+     static let commandDidSucceed = Notification.Name("commandDidSucceed")
++    static let bootedDevicesChanged = Notification.Name("bootedDevicesChanged")
+ }
+diff --git a/MiniSim/Menu.swift b/MiniSim/Menu.swift
+index ba8c413..02bd88b 100644
+--- a/MiniSim/Menu.swift
++++ b/MiniSim/Menu.swift
+@@ -17,6 +17,11 @@ class Menu: NSMenu {
+         didSet {
+             populateDevicesMenu(devices)
+             assignKeyEquivalents()
++            NotificationCenter.default.post(
++                name: .bootedDevicesChanged,
++                object: nil,
++                userInfo: ["count": devices.filter { $0.type == .virtual && $0.booted }.count]
++            )
+         }
+         willSet {
+             let deviceNames = Set(devices.map { $0.displayName })
+@@ -118,6 +123,9 @@ class Menu: NSMenu {
+             }
+             do {
+                 try device.launch()
++                DispatchQueue.main.async {
++                    self.updateDevicesList()
++                }
+             } catch {
+                 NSAlert.showError(message: error.localizedDescription)
+             }
+diff --git a/MiniSim/MiniSim.swift b/MiniSim/MiniSim.swift
+index 961a420..fc1b551 100644
+--- a/MiniSim/MiniSim.swift
++++ b/MiniSim/MiniSim.swift
+@@ -18,6 +18,9 @@ class MiniSim: NSObject {
+     private var isOnboardingFinishedObserver: NSKeyValueObservation?
+     private var menuImageObserver: NSKeyValueObservation?
+ 
++    private var bootedDevicesCount = 0
++    private var refreshTimer: Timer?
++
+     private lazy var onboarding = Onboarding()
+ 
+     override init() {
+@@ -32,8 +35,10 @@ class MiniSim: NSObject {
+     deinit {
+         isOnboardingFinishedObserver?.invalidate()
+         menuImageObserver?.invalidate()
++        refreshTimer?.invalidate()
+         NotificationCenter.default.removeObserver(self, name: .commandDidSucceed, object: nil)
+         NotificationCenter.default.removeObserver(self, name: .deviceDeleted, object: nil)
++        NotificationCenter.default.removeObserver(self, name: .bootedDevicesChanged, object: nil)
+     }
+ 
+     private lazy var settingsController = SettingsWindowController(
+@@ -89,6 +94,24 @@ class MiniSim: NSObject {
+             menu.items += mainMenu
+         }
+         menu.updateDevicesList()
++
++        // The devices list is otherwise only fetched when the menu opens, so
++        // the booted-devices count in the status item would go stale whenever
++        // a simulator is started or stopped outside of MiniSim. Polling the
++        // full list is too slow for a short interval; this asks only for the
++        // cheap booted count and leaves the menu itself to refresh on open.
++        refreshTimer?.invalidate()
++        refreshTimer = Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { [weak self] _ in
++            guard let self else { return }
++            let userDefaults = UserDefaults.standard
++            DeviceServiceFactory.getBootedVirtualDeviceCount(
++                android: userDefaults.enableAndroidEmulators && userDefaults.androidHome != nil,
++                iOS: userDefaults.enableiOSSimulators
++            ) { count in
++                self.bootedDevicesCount = count
++                self.updateBootedDevicesCount()
++            }
++        }
+     }
+ 
+     private func initObservers() {
+@@ -115,6 +138,12 @@ class MiniSim: NSObject {
+             name: .deviceDeleted,
+             object: nil
+         )
++        notificationCenter.addObserver(
++            self,
++            selector: #selector(handleBootedDevicesChanged),
++            name: .bootedDevicesChanged,
++            object: nil
++        )
+     }
+ 
+     private func setDefaultValues() {
+@@ -153,6 +182,26 @@ class MiniSim: NSObject {
+         menu.updateDevicesList()
+     }
+ 
++    @objc private func handleBootedDevicesChanged(_ notification: Notification) {
++        let count = notification.userInfo?["count"] as? Int ?? 0
++        DispatchQueue.main.async {
++            self.bootedDevicesCount = count
++            self.updateBootedDevicesCount()
++        }
++    }
++
++    private func updateBootedDevicesCount() {
++        guard let button = statusItem.button else { return }
++        if bootedDevicesCount > 0 {
++            button.font = NSFont.monospacedDigitSystemFont(ofSize: 12, weight: .semibold)
++            button.title = " \(bootedDevicesCount)"
++            button.imagePosition = .imageLeft
++        } else {
++            button.title = ""
++            button.imagePosition = .imageOnly
++        }
++    }
++
+     @objc func menuItemAction(_ sender: NSMenuItem) {
+         if let tag = MainMenuActions(rawValue: sender.tag) {
+             switch tag {
+diff --git a/MiniSim/Service/DeviceServiceFactory.swift b/MiniSim/Service/DeviceServiceFactory.swift
+index c656dcb..84b8d92 100644
+--- a/MiniSim/Service/DeviceServiceFactory.swift
++++ b/MiniSim/Service/DeviceServiceFactory.swift
+@@ -25,6 +25,43 @@ class DeviceServiceFactory {
+     }
+   }
+ 
++  // A full getAllDevices is too slow to poll: the Android emulator parser
++  // shells out per AVD and devicectl blocks for seconds on physical iPhones.
++  // The status item count only needs booted virtual devices, which two cheap
++  // commands answer: simctl's JSON state and adb's emulator-* serials.
++  static func getBootedVirtualDeviceCount(
++    android: Bool,
++    iOS: Bool,
++    completionQueue: DispatchQueue = .main,
++    completion: @escaping (Int) -> Void
++  ) {
++    queue.async {
++      var count = 0
++
++      if iOS, let output = try? Shell().execute(
++        command: DeviceConstants.ProcessPaths.xcrun.rawValue,
++        arguments: ["simctl", "list", "devices", "available", "-j"]
++      ) {
++        count += DeviceParserFactory().getParser(.iosSimulator)
++          .parse(output)
++          .filter { $0.booted }
++          .count
++      }
++
++      if android,
++         let adbPath = try? ADB.getAdbPath(),
++         let output = try? Shell().execute(command: adbPath, arguments: ["devices"]) {
++        count += output.components(separatedBy: .newlines)
++          .filter { $0.hasPrefix("emulator-") && $0.contains("device") }
++          .count
++      }
++
++      completionQueue.async {
++        completion(count)
++      }
++    }
++  }
++
+   static func getAllDevices(
+     android: Bool,
+     iOS: Bool,
