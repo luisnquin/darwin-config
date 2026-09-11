@@ -44,13 +44,18 @@
 
         sdkmanager --sdk_root="$ANDROID_HOME" ${lib.escapeShellArgs components}
 
-        if ! avdmanager list avd | grep -Fq "Name: ${avdName}"; then
+        # avdmanager derives the sdk root from where it sits and ignores
+        # ANDROID_HOME, so the cask's copy reports an empty repository and
+        # refuses the system image. The one just installed is inside the sdk.
+        avdmanager="$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager"
+
+        if ! "$avdmanager" list avd | grep -Fq "Name: ${avdName}"; then
           device=()
-          if avdmanager list device | grep -Fq '"${avdDevice}"'; then
+          if "$avdmanager" list device | grep -Fq '"${avdDevice}"'; then
             device=(--device "${avdDevice}")
           fi
 
-          printf 'no\n' | avdmanager create avd \
+          printf 'no\n' | "$avdmanager" create avd \
             --name "${avdName}" \
             --package "${systemImage}" \
             "''${device[@]}"
