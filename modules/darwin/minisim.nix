@@ -3,16 +3,14 @@
     config,
     pkgs,
     ...
-  }: let
-    home = "/Users/${config.system.primaryUser}";
-  in {
+  }: {
     environment.systemPackages = [pkgs.minisim];
 
     system.defaults.CustomUserPreferences."com.oskarkwasniewski.MiniSim" = {
       isOnboardingFinished = true;
       enableiOSSimulators = true;
       enableAndroidEmulators = true;
-      androidHome = "${home}/Library/Android/sdk";
+      androidHome = config.home-manager.users.${config.system.primaryUser}.local.android.sdk;
       preferedTerminal = "com.apple.Terminal";
       # Cmd+Option+E, as carbon key codes. Declared because dropping the cask
       # makes `homebrew.onActivation.cleanup = "zap"` delete this domain's plist,

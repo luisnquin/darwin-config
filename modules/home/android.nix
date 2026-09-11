@@ -7,7 +7,7 @@
   }: let
     jdk = pkgs.jdk17;
 
-    sdk = "${config.local.ext.cache}/android/sdk";
+    sdk = config.local.android.sdk;
 
     platform = "36";
     buildTools = "36.0.0";
@@ -58,7 +58,16 @@
       '';
     };
   in {
-    programs = {
+    options.local.android.sdk = lib.mkOption {
+      type = lib.types.str;
+      default = "${config.local.ext.cache}/android/sdk";
+      description = ''
+        Root the Android SDK is provisioned into. Read by the darwin minisim
+        module too, which shells out to <sdk>/emulator/emulator.
+      '';
+    };
+
+    config.programs = {
       java = {
         enable = true;
         package = jdk;
@@ -67,7 +76,7 @@
       gradle.enable = true;
     };
 
-    home = {
+    config.home = {
       packages = [androidSdkProvision];
 
       # cmdline-tools first so the SDK copy shadows the bootstrap cask

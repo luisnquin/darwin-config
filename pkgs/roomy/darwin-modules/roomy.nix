@@ -25,16 +25,20 @@
     exec ${config.nix.package}/bin/nix-collect-garbage --delete-older-than 14d
   '';
 
-  # Everything here is safe for live emulator work: AVDs in ~/.android/avd
-  # are never touched, `simctl delete unavailable` only removes devices whose
-  # runtime is already gone, and the dyld cache wipe is skipped while any
-  # simulator is booted.
+  # Everything here is safe for live emulator work: AVDs are never touched,
+  # `simctl delete unavailable` only removes devices whose runtime is already
+  # gone, and the dyld cache wipe is skipped while any simulator is booted.
   cleanupScript = pkgs.writeShellScript "roomy-cleanup" ''
     set -x
 
     /usr/bin/xcrun simctl delete unavailable || true
 
-    /usr/bin/find "$HOME/Library/Developer/Xcode/DerivedData" \
+    # Asking Xcode where it puts DerivedData keeps this correct when the
+    # location is relocated, which IDECustomDerivedDataLocation exists to do.
+    derivedData=$(/usr/bin/defaults read com.apple.dt.Xcode IDECustomDerivedDataLocation 2>/dev/null) \
+      || derivedData="$HOME/Library/Developer/Xcode/DerivedData"
+
+    /usr/bin/find "$derivedData" \
       -mindepth 1 -maxdepth 1 -mtime +30 -exec rm -rf {} + 2>/dev/null || true
 
     if ! /usr/bin/xcrun simctl list devices booted | grep -q Booted; then
