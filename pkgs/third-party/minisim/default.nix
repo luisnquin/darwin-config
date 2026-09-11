@@ -75,6 +75,12 @@
       # to touch them.
       chmod -R u+w $out
 
+      # The prebuilt-macro lookup is cached under a filename naming the
+      # toolchain and the sdk it was made with, swiftlang-6.3.3.1.3-macosx26.5,
+      # so the output hash would move with every Xcode update. It resolves to
+      # an empty list either way and SwiftPM redoes the lookup when it is gone.
+      rm -rf $out/prebuilts
+
       jq -r '.object.dependencies[]
              | "\(.subpath)\t\(.packageRef.location)\t\(.state.checkoutState.revision)"' \
         $out/workspace-state.json |
@@ -169,7 +175,7 @@
 
     outputHashMode = "recursive";
     outputHashAlgo = "sha256";
-    outputHash = "sha256-hiysyBSycbDsv1LGt00zRtP1Vmf+FIgC6X5b39U1+6o=";
+    outputHash = "sha256-nq79lcWAONYBCJylCZRogd8ALqHRfmzDxlgnRdiYyXQ=";
   };
 in
   stdenvNoCC.mkDerivation {
