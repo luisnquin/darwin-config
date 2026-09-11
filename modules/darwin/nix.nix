@@ -22,7 +22,7 @@
 
     system = {
       primaryUser = "luisnquin";
-      stateVersion = 6;
+      stateVersion = 7;
     };
   };
 }

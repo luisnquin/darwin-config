@@ -1,7 +1,7 @@
 {
   flake.modules.homeManager.user = {pkgs, ...}: {
     home = {
-      stateVersion = "25.05";
+      stateVersion = "26.11";
       username = "luisnquin";
       homeDirectory = pkgs.lib.mkForce "/Users/luisnquin";
     };
