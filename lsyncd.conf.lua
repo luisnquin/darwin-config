@@ -10,13 +10,13 @@ sync {
 
     source    = "/home/luisnquin/Projects/github.com/luisnquin/darwin-config",
     host      = "rose",
-    targetdir = "/Users/luisnquin/.dotfiles",
+    targetdir = "/ext/projects/github.com/luisnquin/darwin-config",
 
     delay     = 1,
 
-    -- untracked-on-rose files are invisible to the flake build; keep .git local
-    -- to rose and it stays a real repo. To make rose an exact mirror instead,
-    -- remove ".git/" from this list (see notes when handing off).
+    -- .git/ is mirrored on purpose: rose's flake build only evaluates files its
+    -- own index tracks, so shipping the index is what makes uncommitted work
+    -- buildable there. Add ".git/" below to leave rose's repo state alone.
     exclude   = {
         ".claude/",
         ".direnv/",
