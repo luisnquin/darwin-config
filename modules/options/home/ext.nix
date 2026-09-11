@@ -5,14 +5,24 @@
     ...
   }: let
     cfg = config.local.ext;
+
+    pathOption = default: description:
+      lib.mkOption {
+        inherit default description;
+        type = lib.types.str;
+      };
   in {
-    options.local.ext.path = lib.mkOption {
-      type = lib.types.str;
-      default = inputs.self.lib.ext.path;
-      description = ''
+    options.local.ext = {
+      path = pathOption inputs.self.lib.ext.path ''
         Mount point of the external SSD that holds toolchains and caches.
         Created via /etc/synthetic.conf and mounted by UUID by the darwin
         ext module; SIP makes /etc/fstab unwritable even as root.
+      '';
+
+      cache = pathOption inputs.self.lib.ext.cache ''
+        Root for state its owning tool rebuilds on demand. Safe to delete at
+        any point, at the cost of the time it takes to refetch. Anything kept
+        beside it on the volume is durable by construction.
       '';
     };
 
