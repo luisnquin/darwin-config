@@ -14,7 +14,11 @@
 10. Execute `sudo nix run nix-darwin/master#darwin-rebuild -- switch --flake .#rose`
 11. Execute `sudo tailscale up --ssh`
 12. Install XCode using the App Store (required for iOS development & proper toolchain).
-13. Sharing > Enable Screen Sharing & Remote Login
+13. Sharing > Enable Screen Sharing; the switch turns Remote Login on by itself
+14. Privacy & Security > Full Disk Access > add the terminal, otherwise TCC denies
+    it `/ext` over ssh with `Operation not permitted`, and sshd cannot raise the
+    consent prompt itself
+15. Run `android-sdk-provision` if `/ext/cache` was cleared; it downloads ~11G
 
 ## Rebuild
 
