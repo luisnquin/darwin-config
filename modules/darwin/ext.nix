@@ -35,8 +35,15 @@
       /usr/sbin/diskutil enableOwnership ${ext.path} > /dev/null
 
       # Enabling ownership exposes the real root owner, root:wheel, which would
-      # stop home-manager from creating its directories.
-      /usr/sbin/chown ${config.system.primaryUser}:staff ${ext.path}
+      # stop home-manager from creating its directories. Only ever when it is
+      # wrong: TCC withholds an external volume from a daemon, so the chown is
+      # denied even as root, and being the last command it would leave the job
+      # exiting 1 for KeepAlive to read as a failed mount and respawn.
+      owner=${config.system.primaryUser}:staff
+
+      if [ "$(/usr/bin/stat -f %Su:%Sg ${ext.path})" != "$owner" ]; then
+        /usr/sbin/chown "$owner" ${ext.path}
+      fi
     '';
   in {
     config = lib.mkIf (ext.uuid != null) {
