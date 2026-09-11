@@ -24,11 +24,16 @@
     # not survive the bundle being replaced. Owning the launch here keeps it
     # declarative. `open` is used over the executable so LaunchServices attributes
     # the accessibility and Apple Events prompts to MiniSim rather than to launchd.
+    #
+    # The emulator list comes from ANDROID_AVD_HOME, which the app reads from
+    # the session it is opened into, so the variables have to be in place
+    # before then rather than whenever the agent that owns them happens to run.
     launchd.user.agents.minisim.serviceConfig = {
       ProgramArguments = [
-        "/usr/bin/open"
-        "-a"
-        "${pkgs.minisim}/Applications/MiniSim.app"
+        "${pkgs.writeShellScript "minisim-open" ''
+          ${config.local.ext.guiEnvScript}
+          exec /usr/bin/open -a ${pkgs.minisim}/Applications/MiniSim.app
+        ''}"
       ];
       RunAtLoad = true;
     };

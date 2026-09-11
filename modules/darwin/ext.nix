@@ -15,6 +15,14 @@
       lib.filterAttrs (_: value: lib.isString value && lib.hasPrefix "${ext.path}/" value)
       hm.home.sessionVariables;
 
+    # launchctl setenv is session state, not a file, so it dies with the login
+    # session and no switch runs at boot to put it back. An agent carries it
+    # across both: user agents are bootstrapped into the Aqua session itself,
+    # which makes a plain setenv land in the one domain GUI apps read.
+    guiEnv = pkgs.writeShellScript "ext-gui-env" (lib.concatLines (lib.mapAttrsToList
+      (name: value: "/bin/launchctl setenv ${name} ${lib.escapeShellArg value}")
+      guiVariables));
+
     # SIP refuses every write to /etc/fstab, as root and through vifs alike, so
     # the mount cannot be declared there. diskutil takes the volume UUID, which
     # is what fstab would have been keyed by anyway: /Volumes names collide.
@@ -46,6 +54,17 @@
       fi
     '';
   in {
+    options.local.ext.guiEnvScript = lib.mkOption {
+      type = lib.types.path;
+      readOnly = true;
+      default = guiEnv;
+      description = ''
+        Puts every variable pointing into the volume in the Aqua session.
+        Run it before launching a GUI app from an agent, which would otherwise
+        race the agent that does it at login.
+      '';
+    };
+
     config = lib.mkIf (ext.uuid != null) {
       system.activationScripts.extraActivation.text = ''
         printf >&2 'setting up %s...\n' ${ext.path}
@@ -70,22 +89,12 @@
         ${mount}
       '';
 
-      # GUI apps inherit launchd's environment and never home.sessionVariables,
-      # so a relocation only a shell can see is one Android Studio or Xcode
-      # undoes by rebuilding the cache back on the internal disk.
-      #
-      # asuser names the Aqua session, the only domain those apps read.
-      # launchd.user.envVariables goes through sudo --user instead, which
-      # writes to whichever namespace the switch was started from: Aqua from a
-      # terminal window, the background one over ssh. Nothing to write to when
-      # nobody is logged in, and a switch is not worth failing over that.
-      system.activationScripts.postActivation.text = ''
-        uid=$(/usr/bin/id -u ${config.system.primaryUser})
-
-        ${lib.concatLines (lib.mapAttrsToList (name: value: ''
-            /bin/launchctl asuser "$uid" /bin/launchctl setenv ${name} ${lib.escapeShellArg value} || true'')
-          guiVariables)}
-      '';
+      # Agents start in an unspecified order, so an app needing these cannot
+      # rely on this one having run; minisim re-runs the script before opening.
+      launchd.user.agents.ext-env.serviceConfig = {
+        ProgramArguments = ["${guiEnv}"];
+        RunAtLoad = true;
+      };
 
       # SuccessfulExit=false retries until the disk shows up, but it stops
       # for good once a mount succeeds, so StartOnMount covers the replug:
