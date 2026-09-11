@@ -7,7 +7,7 @@
   }: let
     jdk = pkgs.jdk17;
 
-    sdk = "${config.home.homeDirectory}/Library/Android/sdk";
+    sdk = "${config.local.ext.path}/android/sdk";
 
     platform = "36";
     buildTools = "36.0.0";

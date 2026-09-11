@@ -8,6 +8,8 @@
         android
         browser
         cli
+        ext
+        extOptions
         fish
         git
         knownHosts

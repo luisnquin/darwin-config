@@ -4,6 +4,7 @@
       dock
       dockOptions
       environment
+      ext
       fish
       fonts
       homebrew
