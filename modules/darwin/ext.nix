@@ -55,11 +55,13 @@
         ${mount}
       '';
 
-      # SuccessfulExit=false retries until the disk shows up, so a volume
-      # attached after boot is picked up without a switch.
+      # SuccessfulExit=false retries until the disk shows up, but it stops
+      # for good once a mount succeeds, so StartOnMount covers the replug:
+      # the volume lands on /Volumes/ext and the script moves it to /ext.
       launchd.daemons.ext-mount.serviceConfig = {
         ProgramArguments = ["${mount}"];
         RunAtLoad = true;
+        StartOnMount = true;
         KeepAlive.SuccessfulExit = false;
         ThrottleInterval = 10;
       };
