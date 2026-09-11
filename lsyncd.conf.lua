@@ -10,7 +10,7 @@ sync {
 
     source    = "/home/luisnquin/Projects/github.com/luisnquin/darwin-config",
     host      = "rose",
-    targetdir = "/ext/projects/github.com/luisnquin/darwin-config",
+    targetdir = "/Users/luisnquin/.dotfiles",
 
     delay     = 1,
 
