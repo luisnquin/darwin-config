@@ -11,10 +11,13 @@
     # capture screenshots without sudo.
     launchd.daemons.pymobiledevice-tunneld = {
       serviceConfig = {
+        # The store is a volume a sibling daemon unlocks at boot, and launchd
+        # sequences this one against it in no way, so the first run exits 126
+        # until KeepAlive happens to retry late enough.
         ProgramArguments = [
           "/bin/sh"
           "-c"
-          "exec ${pymobiledevice3}/bin/pymobiledevice3 remote tunneld"
+          "/bin/wait4path ${pymobiledevice3} && exec ${pymobiledevice3}/bin/pymobiledevice3 remote tunneld"
         ];
         RunAtLoad = true;
         KeepAlive = {
