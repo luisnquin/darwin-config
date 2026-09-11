@@ -7,6 +7,14 @@
   }: let
     inherit (inputs.self.lib) ext;
 
+    hm = config.home-manager.users.${config.system.primaryUser};
+
+    # Everything the home modules redirect onto the volume, matched by value
+    # so a cache added there needs no second list kept in step here.
+    guiVariables =
+      lib.filterAttrs (_: value: lib.isString value && lib.hasPrefix "${ext.path}/" value)
+      hm.home.sessionVariables;
+
     # SIP refuses every write to /etc/fstab, as root and through vifs alike, so
     # the mount cannot be declared there. diskutil takes the volume UUID, which
     # is what fstab would have been keyed by anyway: /Volumes names collide.
@@ -53,6 +61,23 @@
         # The daemon covers boot; this covers the rest of this activation,
         # whose home-manager step asserts the volume is mounted.
         ${mount}
+      '';
+
+      # GUI apps inherit launchd's environment and never home.sessionVariables,
+      # so a relocation only a shell can see is one Android Studio or Xcode
+      # undoes by rebuilding the cache back on the internal disk.
+      #
+      # asuser names the Aqua session, the only domain those apps read.
+      # launchd.user.envVariables goes through sudo --user instead, which
+      # writes to whichever namespace the switch was started from: Aqua from a
+      # terminal window, the background one over ssh. Nothing to write to when
+      # nobody is logged in, and a switch is not worth failing over that.
+      system.activationScripts.postActivation.text = ''
+        uid=$(/usr/bin/id -u ${config.system.primaryUser})
+
+        ${lib.concatLines (lib.mapAttrsToList (name: value: ''
+            /bin/launchctl asuser "$uid" /bin/launchctl setenv ${name} ${lib.escapeShellArg value} || true'')
+          guiVariables)}
       '';
 
       # SuccessfulExit=false retries until the disk shows up, but it stops

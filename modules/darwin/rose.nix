@@ -1,7 +1,6 @@
 {inputs, ...}: {
   flake.modules.darwin.rose = {
     imports = with inputs.self.modules.darwin; [
-      android
       dock
       dockOptions
       environment
