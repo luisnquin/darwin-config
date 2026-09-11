@@ -21,7 +21,9 @@
 14. Privacy & Security > Full Disk Access > add the terminal, otherwise TCC denies
     it `/ext` over ssh with `Operation not permitted`, and sshd cannot raise the
     consent prompt itself
-15. Run `android-sdk-provision` if `/ext/cache` was cleared; it downloads ~11G
+15. Run `android-sdk-provision` unless `/ext/cache/android/sdk` is already
+    populated; it downloads ~11G. MiniSim shells out to the emulator in there
+    and reports status code 127 until it exists
 
 ## Rebuild
 
