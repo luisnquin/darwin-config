@@ -14,8 +14,6 @@
         macos
         node
         packages
-        sickdeck
-        sickdeckOptions
         ssh
         tmux
         user

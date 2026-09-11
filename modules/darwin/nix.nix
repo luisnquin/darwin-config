@@ -16,7 +16,6 @@
         inputs.self.overlays.phone
         inputs.self.overlays.pymobiledevice3
         inputs.self.overlays.roomy
-        inputs.self.overlays.sickdeck
       ];
       config.allowUnfree = true;
     };
