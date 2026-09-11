@@ -100,7 +100,12 @@
       # for good once a mount succeeds, so StartOnMount covers the replug:
       # the volume lands on /Volumes/ext and the script moves it to /ext.
       launchd.daemons.ext-mount.serviceConfig = {
-        ProgramArguments = ["${mount}"];
+        # The store is a volume of its own, unlocked at boot by a sibling
+        # daemon that launchd sequences this one against in no way. A store
+        # path as the program is a missing executable whenever that race is
+        # lost, and launchd answers those with a penalty box rather than with
+        # the retry KeepAlive gives a run that failed.
+        ProgramArguments = ["/bin/sh" "-c" "/bin/wait4path ${mount} && exec ${mount}"];
         RunAtLoad = true;
         StartOnMount = true;
         KeepAlive.SuccessfulExit = false;
