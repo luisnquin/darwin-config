@@ -17,11 +17,16 @@
 10. Attach the external SSD; the switch mounts it at `/ext` and fails without it
 11. Execute `sudo nix run nix-darwin/master#darwin-rebuild -- switch --flake .#rose`
 12. Execute `sudo tailscale up --ssh`
-13. Sharing > Enable Screen Sharing; the switch turns Remote Login on by itself
-14. Privacy & Security > Full Disk Access > add the terminal, otherwise TCC denies
+13. Keep FileVault off, or turn it off now with `sudo fdesetup disable`. Its
+    pre-boot prompt runs before launchd, so after a power cut or a panic the
+    machine sits there with no sshd and no tailscaled, and macOS refuses
+    auto-login while it is on. Then let the user agents start after a restart:
+    `sudo sysadminctl -autologin set -userName luisnquin -password -`
+14. Sharing > Enable Screen Sharing; the switch turns Remote Login on by itself
+15. Privacy & Security > Full Disk Access > add the terminal, otherwise TCC denies
     it `/ext` over ssh with `Operation not permitted`, and sshd cannot raise the
     consent prompt itself
-15. Run `android-sdk-provision` unless `/ext/cache/android/sdk` is already
+16. Run `android-sdk-provision` unless `/ext/cache/android/sdk` is already
     populated; it downloads ~11G. MiniSim shells out to the emulator in there
     and reports status code 127 until it exists
 
