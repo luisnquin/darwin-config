@@ -1,8 +1,5 @@
 {
   flake.modules.darwin.tailscale = {
-    services.tailscale = {
-      enable = true;
-      overrideLocalDns = true;
-    };
+    services.tailscale.enable = true;
   };
 }
