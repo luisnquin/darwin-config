@@ -11,6 +11,11 @@
         autoUpdate = true;
         cleanup = "zap";
         upgrade = true;
+ 
+        extraEnv = {
+          HOMEBREW_NO_ENV_HINTS = "1";
+          HOMEBREW_NO_ANALYTICS = "1";
+        };
       };
 
       taps = [
