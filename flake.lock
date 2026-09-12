@@ -153,11 +153,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1789241882,
-        "narHash": "sha256-tp3ByTSlgPpqUWLj12LXeQxwZRX2dUA/U1GGs3GYwWI=",
+        "lastModified": 1789255864,
+        "narHash": "sha256-7aRKCMzjoeIn3BAz6GSZaF/CA+ERdbXRPsoyzHuwWzY=",
         "owner": "luisnquin",
         "repo": "luisnquin",
-        "rev": "19cec0d63e443529e368ccf00f17db293f4df7d6",
+        "rev": "6f29571fa4becd72fdf9ab3a3881b8794dd33676",
         "type": "github"
       },
       "original": {
@@ -248,6 +248,28 @@
       "original": {
         "owner": "0xc000022070",
         "repo": "nixgrep",
+        "type": "github"
+      }
+    },
+    "nixos-config-overlays": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "dir": "overlays",
+        "lastModified": 1789255340,
+        "narHash": "sha256-JBq1pxpDEtGCitgfCgjh3iQlore7ZSoau14VaUCzWCU=",
+        "owner": "luisnquin",
+        "repo": "nixos-config",
+        "rev": "16b6010b19efe838f6d2ece091b59b033ffbe18e",
+        "type": "github"
+      },
+      "original": {
+        "dir": "overlays",
+        "owner": "luisnquin",
+        "repo": "nixos-config",
         "type": "github"
       }
     },
@@ -367,6 +389,7 @@
         "identity": "identity",
         "nix-darwin": "nix-darwin",
         "nix-homebrew": "nix-homebrew",
+        "nixos-config-overlays": "nixos-config-overlays",
         "nixos-config-pkgs": "nixos-config-pkgs",
         "nixpkgs": "nixpkgs",
         "nixpkgs-extra": "nixpkgs-extra",
