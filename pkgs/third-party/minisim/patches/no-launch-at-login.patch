@@ -1,0 +1,23 @@
+diff --git a/MiniSim/Views/Preferences.swift b/MiniSim/Views/Preferences.swift
+index f803090..2011ede 100644
+--- a/MiniSim/Views/Preferences.swift
++++ b/MiniSim/Views/Preferences.swift
+@@ -4,7 +4,6 @@
+ //
+ 
+ import KeyboardShortcuts
+-import LaunchAtLogin
+ import Settings
+ import SwiftUI
+ 
+@@ -68,10 +67,6 @@ struct Preferences: View {
+                 Text("This clears data saved in cache. \nFor example: developer tool paths.")
+                     .descriptionText()
+             }
+-            Settings.Section(title: "") {
+-                Divider()
+-                LaunchAtLogin.Toggle("Launch at login")
+-            }
+         }
+         .frame(minWidth: 650, minHeight: 450)
+         .onAppear {

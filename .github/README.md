@@ -6,8 +6,8 @@
 2. Update computer's name to "rose"
 3. Execute `xcode-select --install` (Command Line Tools)
 4. Install Xcode from the App Store and launch it once, to let it finish its
-   components and to accept the license. MiniSim is built from source against
-   `/Applications/Xcode.app` and step 11 fails without it. Start the download
+   components and to accept the license. Nothing in the switch needs it, but
+   MiniSim drives its iOS simulators through it at runtime. Start the download
    now; the steps below run alongside it
 5. Install nix via [Lix variant](https://lix.systems/install/#on-any-other-linuxmacos-system)
 6. Generate ssh key: `ssh-keygen -t ed25519 -C "your_email@example.com"`

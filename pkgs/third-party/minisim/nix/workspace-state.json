@@ -1,0 +1,127 @@
+{
+  "object": {
+    "artifacts": [],
+    "dependencies": [
+      {
+        "basedOn": null,
+        "packageRef": {
+          "identity": "acknowlist",
+          "kind": "remoteSourceControl",
+          "location": "https://github.com/vtourraine/AcknowList",
+          "name": "AcknowList"
+        },
+        "state": {
+          "checkoutState": {
+            "revision": "125ff1915a639bf7d97471a4d5ae16765d0c50f2",
+            "version": "3.2.0"
+          },
+          "name": "sourceControlCheckout"
+        },
+        "subpath": "AcknowList"
+      },
+      {
+        "basedOn": null,
+        "packageRef": {
+          "identity": "codeeditor",
+          "kind": "remoteSourceControl",
+          "location": "https://github.com/ZeeZide/CodeEditor.git",
+          "name": "CodeEditor"
+        },
+        "state": {
+          "checkoutState": {
+            "revision": "f5c076b94f4ceb05abff88ba91d75a8d57143f0c",
+            "version": "1.2.6"
+          },
+          "name": "sourceControlCheckout"
+        },
+        "subpath": "CodeEditor"
+      },
+      {
+        "basedOn": null,
+        "packageRef": {
+          "identity": "highlightr",
+          "kind": "remoteSourceControl",
+          "location": "https://github.com/helje5/Highlightr",
+          "name": "Highlightr"
+        },
+        "state": {
+          "checkoutState": {
+            "revision": "bd0358056ff1f12ea83833a9fc1b3b5a396a9da0",
+            "version": "3.0.2"
+          },
+          "name": "sourceControlCheckout"
+        },
+        "subpath": "Highlightr"
+      },
+      {
+        "basedOn": null,
+        "packageRef": {
+          "identity": "keyboardshortcuts",
+          "kind": "remoteSourceControl",
+          "location": "https://github.com/sindresorhus/KeyboardShortcuts",
+          "name": "KeyboardShortcuts"
+        },
+        "state": {
+          "checkoutState": {
+            "branch": "main",
+            "revision": "e6b60117ec266e1e5d059f7f34815144f9762b36"
+          },
+          "name": "sourceControlCheckout"
+        },
+        "subpath": "KeyboardShortcuts"
+      },
+      {
+        "basedOn": null,
+        "packageRef": {
+          "identity": "settings",
+          "kind": "remoteSourceControl",
+          "location": "https://github.com/sindresorhus/Settings",
+          "name": "Settings"
+        },
+        "state": {
+          "checkoutState": {
+            "branch": "main",
+            "revision": "879ea83a7bbc6dbebf62bed8c547f090146372a6"
+          },
+          "name": "sourceControlCheckout"
+        },
+        "subpath": "Settings"
+      },
+      {
+        "basedOn": null,
+        "packageRef": {
+          "identity": "shellout",
+          "kind": "remoteSourceControl",
+          "location": "https://github.com/JohnSundell/ShellOut.git",
+          "name": "ShellOut"
+        },
+        "state": {
+          "checkoutState": {
+            "revision": "e1577acf2b6e90086d01a6d5e2b8efdaae033568",
+            "version": "2.3.0"
+          },
+          "name": "sourceControlCheckout"
+        },
+        "subpath": "ShellOut"
+      },
+      {
+        "basedOn": null,
+        "packageRef": {
+          "identity": "symbolpicker",
+          "kind": "remoteSourceControl",
+          "location": "https://github.com/xnth97/SymbolPicker.git",
+          "name": "SymbolPicker"
+        },
+        "state": {
+          "checkoutState": {
+            "revision": "f82b64bcc3d761c9e63aaa10b1912bba72cbf6d8",
+            "version": "1.5.3"
+          },
+          "name": "sourceControlCheckout"
+        },
+        "subpath": "SymbolPicker"
+      }
+    ]
+  },
+  "version": 6
+}

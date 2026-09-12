@@ -1,0 +1,41 @@
+diff --git a/MiniSim/Views/About.swift b/MiniSim/Views/About.swift
+index 91d6a34..169b9d2 100644
+--- a/MiniSim/Views/About.swift
++++ b/MiniSim/Views/About.swift
+@@ -6,22 +6,12 @@
+ //
+ 
+ import AcknowList
+-import Sparkle
+ import SwiftUI
+ 
+ struct About: View {
+-  private let updaterController: SPUStandardUpdaterController
+   @Environment(\.openURL) private var openURL
+   @State private var isAcknowledgementsListPresented = false
+ 
+-  init() {
+-    updaterController = SPUStandardUpdaterController(
+-      startingUpdater: true,
+-      updaterDelegate: nil,
+-      userDriverDelegate: nil
+-    )
+-  }
+-
+   let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
+   private let bottomPadding: Double = 10
+   private let minFrameWidth: Double = 650
+@@ -36,13 +26,6 @@ struct About: View {
+         Text("Version: \(appVersion)")
+           .padding(.bottom, bottomPadding)
+       }
+-      Button {
+-        updaterController.updater.checkForUpdates()
+-      } label: {
+-        Label("Check for updates", systemImage: "gear")
+-      }
+-      .padding(.bottom, bottomPadding)
+-
+       Button("Acknowledgements") {
+         isAcknowledgementsListPresented.toggle()
+       }
