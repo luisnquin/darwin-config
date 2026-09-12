@@ -146,6 +146,26 @@
         "type": "github"
       }
     },
+    "identity": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1789241882,
+        "narHash": "sha256-tp3ByTSlgPpqUWLj12LXeQxwZRX2dUA/U1GGs3GYwWI=",
+        "owner": "luisnquin",
+        "repo": "luisnquin",
+        "rev": "19cec0d63e443529e368ccf00f17db293f4df7d6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "luisnquin",
+        "repo": "luisnquin",
+        "type": "github"
+      }
+    },
     "nix-darwin": {
       "inputs": {
         "nixpkgs": [
@@ -344,6 +364,7 @@
         "black-terminal": "black-terminal",
         "flake-parts": "flake-parts",
         "home-manager": "home-manager",
+        "identity": "identity",
         "nix-darwin": "nix-darwin",
         "nix-homebrew": "nix-homebrew",
         "nixos-config-pkgs": "nixos-config-pkgs",
