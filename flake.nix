@@ -17,6 +17,10 @@
       url = "github:luisnquin/luisnquin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nixos-config-overlays = {
+      url = "github:luisnquin/nixos-config?dir=overlays";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     nixos-config-pkgs = {
       url = "github:luisnquin/nixos-config?dir=pkgs";
       inputs.nixpkgs.follows = "nixpkgs";

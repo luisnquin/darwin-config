@@ -12,9 +12,8 @@
       hostPlatform = "aarch64-darwin";
       overlays = [
         inputs.nixpkgs-extra.overlays.default
-        inputs.self.overlays.bat
+        inputs.nixos-config-overlays.overlays.default
         inputs.self.overlays.minisim
-        inputs.self.overlays.phone
         inputs.self.overlays.pymobiledevice3
         inputs.self.overlays.roomy
       ];
