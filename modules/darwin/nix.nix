@@ -5,6 +5,7 @@
       settings.experimental-features = "nix-command flakes";
       package = pkgs.lix;
       optimise.automatic = true;
+      channel.enable = false;
     };
 
     nixpkgs = {
