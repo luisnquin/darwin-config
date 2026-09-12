@@ -28,7 +28,7 @@ swiftPackages.stdenv.mkDerivation {
   buildPhase = ''
     runHook preBuild
 
-    swiftc -O Sources/Logic.swift Sources/main.swift -o Roomy
+    swiftc -O Sources/Logic.swift Sources/System.swift Sources/main.swift -o Roomy
 
     runHook postBuild
   '';

@@ -10,6 +10,7 @@ func format(_ bytes: Int64) -> String {
 
 func compact(_ bytes: Int64) -> String {
     let gb = Double(bytes) / Double(gigabyte)
+    if gb >= 1000 { return String(format: "%.1fT", gb / 1000) }
     return gb >= 10 ? String(format: "%.0fG", gb) : String(format: "%.1fG", gb)
 }
 
@@ -32,6 +33,46 @@ func freeSpaceLevel(free: Int64, total: Int64) -> FreeSpaceLevel {
     if free < 8 * gigabyte { return .critical }
     if free < max(15 * gigabyte, total / 10) { return .low }
     return .normal
+}
+
+// MARK: - Drives
+
+// statfs names the mounted device, "/dev/disk3s1s1" for the boot volume. Every
+// APFS volume in one container draws from the same pool of free space, so the
+// container — disk3 — is what identifies a drive. Keying by mount point would
+// list /nix, / and /System/Volumes/Data as three disks holding one disk's
+// bytes, and /nix reports zero free space of its own on top of that.
+func containerIdentifier(ofMountDevice device: String) -> String? {
+    let prefix = "/dev/disk"
+    guard device.hasPrefix(prefix) else { return nil }
+    let digits = device.dropFirst(prefix.count).prefix { $0.isNumber }
+    return digits.isEmpty ? nil : "disk\(digits)"
+}
+
+struct Volume: Equatable {
+    let identifier: String
+    let mountPoint: String
+    let name: String
+    let isInternal: Bool
+
+    // internaldrive and externaldrive draw the same slab; sitting next to each
+    // other in the menu bar they read as one glyph printed twice. Filling the
+    // internal one and giving the external one its connector separates them by
+    // silhouette, which survives being 11pt tall.
+    var symbol: String {
+        isInternal ? "internaldrive.fill" : "externaldrive.connected.to.line.below"
+    }
+    var kind: String { isInternal ? "Internal" : "External" }
+}
+
+struct DiskUsage {
+    let free: Int64
+    let total: Int64
+    let purgeable: Int64
+
+    var usedFraction: Double { total > 0 ? 1 - Double(free) / Double(total) : 0 }
+    var freePercent: Int { total > 0 ? Int(Double(free) / Double(total) * 100) : 0 }
+    var level: FreeSpaceLevel { freeSpaceLevel(free: free, total: total) }
 }
 
 // What makes a cleanup unsafe right now. Checked live so a tip is offered as
@@ -80,87 +121,144 @@ struct Candidate {
     let gate: Gate?
 }
 
-let home = NSHomeDirectory()
+// The caches below are relocated onto the external volume through session
+// variables, so the variable is the only honest source for where they are: a
+// hardcoded ~/.gradle would measure a directory nothing writes to any more.
+// ~/Projects and the DeviceSupport folder move by symlink instead, and `du` on
+// a symlink measures the link, so every path is resolved through its links —
+// which also puts the drive it truly sits on in the row's tooltip.
+//
+// Emulator-safe on purpose: AVDs are never deletion targets, `simctl delete
+// unavailable` only removes devices whose runtime is already gone, and anything
+// a live emulator/simulator/Xcode could depend on is gated behind a runtime
+// check. TCC-protected folders (Downloads, Trash, Desktop, Documents) are
+// excluded: the ad-hoc signature changes every rebuild, so macOS would re-prompt
+// for them after every darwin-rebuild switch.
+func makeCandidates(
+    home: String, environment: [String: String], derivedData: String?
+) -> [Candidate] {
+    func resolve(_ path: String) -> String {
+        URL(fileURLWithPath: path).resolvingSymlinksInPath().path
+    }
 
-// Emulator-safe on purpose: AVDs in ~/.android/avd are never deletion targets,
-// `simctl delete unavailable` only removes devices whose runtime is already
-// gone, and anything a live emulator/simulator/Xcode could depend on is gated
-// behind a runtime check. TCC-protected folders (Downloads, Trash, Desktop,
-// Documents) are excluded: the ad-hoc signature changes every rebuild, so
-// macOS would re-prompt for them after every darwin-rebuild switch.
-let candidates: [Candidate] = [
-    Candidate(
-        path: "/nix/store", label: "Nix store",
-        sublabel: "Old generations", symbol: "shippingbox", tint: "blue",
-        tip: "Trim old generations",
-        // roomy-gc sweeps dead .app store paths first; plain nix-collect-garbage
-        // aborts on them (TCC denies the chmod nix does before unlinking).
-        tipCommand: "sudo roomy-gc",
-        threshold: 15 * gigabyte, gate: nil),
-    Candidate(
-        path: "\(home)/Library/Developer/Xcode/DerivedData", label: "Xcode DerivedData",
-        sublabel: "Build data, Xcode rebuilds it", symbol: "hammer", tint: "orange",
-        tip: "Safe to wipe, Xcode rebuilds it",
-        tipCommand: "rm -rf ~/Library/Developer/Xcode/DerivedData",
-        threshold: 5 * gigabyte, gate: .xcodeRunning),
-    Candidate(
-        path: "\(home)/Library/Developer/CoreSimulator", label: "iOS simulators",
-        sublabel: "Runtimes and devices", symbol: "iphone", tint: "purple",
-        tip: "Drop simulators with no runtime",
-        tipCommand: "xcrun simctl delete unavailable",
-        threshold: 10 * gigabyte, gate: nil),
-    Candidate(
-        path: "\(home)/Library/Developer/CoreSimulator/Caches", label: "Simulator dyld caches",
-        sublabel: "Regenerated on next boot", symbol: "memorychip", tint: "teal",
-        tip: "Regenerated on next boot",
-        tipCommand: "xcrun simctl shutdown all && rm -rf ~/Library/Developer/CoreSimulator/Caches/dyld",
-        threshold: 3 * gigabyte, gate: .simulatorsBooted),
-    Candidate(
-        path: "\(home)/Library/Developer/Xcode/iOS DeviceSupport", label: "iOS DeviceSupport",
-        sublabel: "Per-iOS debug symbols", symbol: "cable.connector", tint: "indigo",
-        tip: "Keep only your current device's iOS version",
-        tipCommand: "ls ~/Library/Developer/Xcode/iOS\\ DeviceSupport",
-        threshold: 3 * gigabyte, gate: nil),
-    Candidate(
-        path: "\(home)/Library/Developer/Xcode/Archives", label: "Xcode archives",
-        sublabel: "Release archives", symbol: "archivebox", tint: "brown",
-        tip: "Old .xcarchives pile up per release",
-        tipCommand: "open ~/Library/Developer/Xcode/Archives",
-        threshold: 2 * gigabyte, gate: nil),
-    Candidate(
-        path: "\(home)/.android/avd", label: "Android AVDs",
-        sublabel: "Snapshots take the space", symbol: "candybarphone", tint: "green",
-        tip: "Wipe snapshots, keep the AVDs",
-        tipCommand: "rm -rf ~/.android/avd/*.avd/snapshots",
-        threshold: 10 * gigabyte, gate: .androidEmulatorRunning),
-    Candidate(
-        path: "\(home)/Library/Android", label: "Android SDK",
-        sublabel: "System images and platforms", symbol: "wrench.and.screwdriver", tint: "green",
-        tip: "Drop unused system images",
-        tipCommand: "sdkmanager --list_installed",
-        threshold: 12 * gigabyte, gate: .androidEmulatorRunning),
-    Candidate(
-        path: "\(home)/.gradle", label: "Gradle caches",
-        sublabel: "Build cache", symbol: "cube", tint: "cyan",
-        tip: "Safe to wipe, Gradle re-downloads",
-        tipCommand: "rm -rf ~/.gradle/caches",
-        threshold: 4 * gigabyte, gate: nil),
-    Candidate(
-        path: "\(home)/Library/Caches", label: "User caches",
-        sublabel: "App caches", symbol: "folder", tint: "gray",
-        tip: nil, tipCommand: nil,
-        threshold: 4 * gigabyte, gate: nil),
-    Candidate(
-        path: "/opt/homebrew", label: "Homebrew",
-        sublabel: "Bottles and caches", symbol: "mug", tint: "yellow",
-        tip: "Purge old bottles and caches",
-        tipCommand: "brew cleanup --prune=all",
-        threshold: 8 * gigabyte, gate: nil),
-]
+    func value(_ names: [String], or fallback: String) -> String {
+        resolve(names.lazy.compactMap { environment[$0] }.first { !$0.isEmpty } ?? fallback)
+    }
+
+    let avd = value(["ANDROID_AVD_HOME"], or: "\(home)/.android/avd")
+    let sdk = value(["ANDROID_SDK_ROOT", "ANDROID_HOME"], or: "\(home)/Library/Android")
+    let gradle = value(["GRADLE_USER_HOME"], or: "\(home)/.gradle")
+    let npm = value(["npm_config_cache"], or: "\(home)/.npm")
+    let cargo = value(["CARGO_HOME"], or: "\(home)/.cargo")
+    let cocoapods = value(["CP_HOME_DIR"], or: "\(home)/.cocoapods")
+
+    return [
+        Candidate(
+            path: "/nix/store", label: "Nix store",
+            sublabel: "Old generations", symbol: "shippingbox", tint: "blue",
+            tip: "Trim old generations",
+            // roomy-gc sweeps dead .app store paths first; plain nix-collect-garbage
+            // aborts on them (TCC denies the chmod nix does before unlinking).
+            tipCommand: "sudo roomy-gc",
+            threshold: 15 * gigabyte, gate: nil),
+        Candidate(
+            path: resolve(derivedData ?? "\(home)/Library/Developer/Xcode/DerivedData"),
+            label: "Xcode DerivedData",
+            sublabel: "Build data, Xcode rebuilds it", symbol: "hammer", tint: "orange",
+            tip: "Safe to wipe, Xcode rebuilds it",
+            tipCommand: "rm -rf \(shellQuoted(derivedData ?? "~/Library/Developer/Xcode/DerivedData"))",
+            threshold: 5 * gigabyte, gate: .xcodeRunning),
+        Candidate(
+            path: "\(home)/Library/Developer/CoreSimulator", label: "iOS simulators",
+            sublabel: "Runtimes and devices", symbol: "iphone", tint: "purple",
+            tip: "Drop simulators with no runtime",
+            tipCommand: "xcrun simctl delete unavailable",
+            threshold: 10 * gigabyte, gate: nil),
+        Candidate(
+            path: "\(home)/Library/Developer/CoreSimulator/Caches", label: "Simulator dyld caches",
+            sublabel: "Regenerated on next boot", symbol: "memorychip", tint: "teal",
+            tip: "Regenerated on next boot",
+            tipCommand: "xcrun simctl shutdown all && rm -rf ~/Library/Developer/CoreSimulator/Caches/dyld",
+            threshold: 3 * gigabyte, gate: .simulatorsBooted),
+        Candidate(
+            path: resolve("\(home)/Library/Developer/Xcode/iOS DeviceSupport"),
+            label: "iOS DeviceSupport",
+            sublabel: "Per-iOS debug symbols", symbol: "cable.connector", tint: "indigo",
+            tip: "Keep only your current device's iOS version",
+            tipCommand: "ls ~/Library/Developer/Xcode/iOS\\ DeviceSupport",
+            threshold: 3 * gigabyte, gate: nil),
+        Candidate(
+            path: "\(home)/Library/Developer/Xcode/Archives", label: "Xcode archives",
+            sublabel: "Release archives", symbol: "archivebox", tint: "brown",
+            tip: "Old .xcarchives pile up per release",
+            tipCommand: "open ~/Library/Developer/Xcode/Archives",
+            threshold: 2 * gigabyte, gate: nil),
+        Candidate(
+            path: avd, label: "Android AVDs",
+            sublabel: "Snapshots take the space", symbol: "candybarphone", tint: "green",
+            tip: "Wipe snapshots, keep the AVDs",
+            tipCommand: "rm -rf \(shellQuoted(avd))/*.avd/snapshots",
+            threshold: 10 * gigabyte, gate: .androidEmulatorRunning),
+        Candidate(
+            path: sdk, label: "Android SDK",
+            sublabel: "System images and platforms", symbol: "wrench.and.screwdriver", tint: "green",
+            tip: "Drop unused system images",
+            tipCommand: "sdkmanager --list_installed",
+            threshold: 12 * gigabyte, gate: .androidEmulatorRunning),
+        Candidate(
+            path: gradle, label: "Gradle caches",
+            sublabel: "Build cache", symbol: "cube", tint: "cyan",
+            tip: "Safe to wipe, Gradle re-downloads",
+            tipCommand: "rm -rf \(shellQuoted(gradle))/caches",
+            threshold: 4 * gigabyte, gate: nil),
+        Candidate(
+            path: npm, label: "npm cache",
+            sublabel: "Downloaded packages", symbol: "cube.transparent", tint: "red",
+            tip: "Safe to wipe, npm re-downloads",
+            tipCommand: "npm cache clean --force",
+            threshold: 3 * gigabyte, gate: nil),
+        Candidate(
+            path: cargo, label: "Cargo home",
+            sublabel: "Registry and build artifacts", symbol: "gearshape.2", tint: "pink",
+            tip: "The registry cache re-downloads",
+            tipCommand: "rm -rf \(shellQuoted(cargo))/registry/cache",
+            threshold: 3 * gigabyte, gate: nil),
+        Candidate(
+            path: cocoapods, label: "CocoaPods",
+            sublabel: "Spec repos and pod cache", symbol: "books.vertical", tint: "mint",
+            tip: "Spec repos re-clone on the next install",
+            tipCommand: "rm -rf \(shellQuoted(cocoapods))/repos",
+            threshold: 2 * gigabyte, gate: nil),
+        Candidate(
+            path: "\(home)/Library/Caches", label: "User caches",
+            sublabel: "App caches", symbol: "folder", tint: "gray",
+            tip: nil, tipCommand: nil,
+            threshold: 4 * gigabyte, gate: nil),
+        Candidate(
+            path: "/opt/homebrew", label: "Homebrew",
+            sublabel: "Bottles and caches", symbol: "mug", tint: "yellow",
+            tip: "Purge old bottles and caches",
+            tipCommand: "brew cleanup --prune=all",
+            threshold: 8 * gigabyte, gate: nil),
+        // Never a cleanup target; listed so the drive holding it accounts for
+        // its own biggest occupant rather than looking mysteriously full.
+        Candidate(
+            path: resolve("\(home)/Projects"), label: "Projects",
+            sublabel: "Working trees, nothing to reclaim", symbol: "curlybraces", tint: "gray",
+            tip: nil, tipCommand: nil,
+            threshold: .max, gate: nil),
+    ]
+}
+
+func shellQuoted(_ path: String) -> String {
+    path.contains(" ") ? "'\(path)'" : path
+}
 
 struct Measurement {
     let candidate: Candidate
     let size: Int64
+    // Container identifier of the drive the path actually sits on.
+    let volume: String
 }
 
 func tipMeasurements(from results: [Measurement]) -> [Measurement] {
@@ -185,4 +283,27 @@ func reclaimable(from results: [Measurement], status: RuntimeStatus) -> Reclaima
         }
     }
     return totals
+}
+
+// One drive's whole story: how full it is, what fills it, what can go.
+struct VolumeReport {
+    let volume: Volume
+    let usage: DiskUsage
+    let measurements: [Measurement]
+    let reclaimable: Reclaimable
+}
+
+func buildReports(
+    volumes: [Volume],
+    usage: (Volume) -> DiskUsage?,
+    measurements: [Measurement],
+    status: RuntimeStatus
+) -> [VolumeReport] {
+    volumes.compactMap { volume in
+        guard let usage = usage(volume) else { return nil }
+        let own = measurements.filter { $0.volume == volume.identifier }
+        return VolumeReport(
+            volume: volume, usage: usage, measurements: own,
+            reclaimable: reclaimable(from: own, status: status))
+    }
 }

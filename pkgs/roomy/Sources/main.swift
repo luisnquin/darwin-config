@@ -1,46 +1,5 @@
 import AppKit
 
-func shell(_ launchPath: String, _ arguments: [String], background: Bool = false) -> String? {
-    let process = Process()
-    process.executableURL = URL(fileURLWithPath: launchPath)
-    process.arguments = arguments
-    // Background QoS opts the child into darwin's I/O throttling, so a du walk
-    // over /nix/store cannot starve foreground work.
-    process.qualityOfService = background ? .background : .userInitiated
-    let stdout = Pipe()
-    process.standardOutput = stdout
-    process.standardError = FileHandle.nullDevice
-    do { try process.run() } catch { return nil }
-    let data = stdout.fileHandleForReading.readDataToEndOfFile()
-    process.waitUntilExit()
-    return String(data: data, encoding: .utf8)
-}
-
-struct DiskInfo {
-    let free: Int64
-    let total: Int64
-    let purgeable: Int64
-
-    static func current() -> DiskInfo? {
-        let url = URL(fileURLWithPath: NSHomeDirectory())
-        guard
-            let values = try? url.resourceValues(forKeys: [
-                .volumeAvailableCapacityForImportantUsageKey,
-                .volumeAvailableCapacityKey,
-                .volumeTotalCapacityKey,
-            ]),
-            let important = values.volumeAvailableCapacityForImportantUsage,
-            let strict = values.volumeAvailableCapacity,
-            let total = values.volumeTotalCapacity
-        else { return nil }
-        return DiskInfo(
-            free: important,
-            total: Int64(total),
-            purgeable: max(0, important - Int64(strict))
-        )
-    }
-}
-
 extension RuntimeStatus {
     static func detect() -> RuntimeStatus {
         var status = RuntimeStatus()
@@ -75,8 +34,16 @@ final class Scanner {
             let sizes = defaults.dictionary(forKey: Self.cacheSizesKey) as? [String: Int64],
             let date = defaults.object(forKey: Self.cacheDateKey) as? Date
         else { return }
+        // Sizes are cached, the drive each path sits on is not: an unplugged
+        // volume takes its rows with it rather than reattributing them.
         results = candidates.compactMap { candidate in
-            sizes[candidate.path].map { Measurement(candidate: candidate, size: $0) }
+            guard
+                let size = sizes[candidate.path],
+                FileManager.default.fileExists(atPath: candidate.path)
+            else { return nil }
+            return Measurement(
+                candidate: candidate, size: size,
+                volume: volumeIdentifier(ofPath: candidate.path))
         }.sorted { $0.size > $1.size }
         lastScan = date
     }
@@ -99,7 +66,9 @@ final class Scanner {
                     let output = shell("/usr/bin/du", ["-sk", candidate.path], background: true),
                     let size = parseDuOutput(output)
                 else { continue }
-                measured.append(Measurement(candidate: candidate, size: size))
+                measured.append(Measurement(
+                    candidate: candidate, size: size,
+                    volume: volumeIdentifier(ofPath: candidate.path)))
             }
             measured.sort { $0.size > $1.size }
             DispatchQueue.main.async {
@@ -131,7 +100,27 @@ func tintColor(_ name: String) -> NSColor {
     case "cyan": return .systemCyan
     case "yellow": return .systemYellow
     case "red": return .systemRed
+    case "pink": return .systemPink
+    case "mint": return .systemMint
     default: return .secondaryLabelColor
+    }
+}
+
+// The bar and the dot always carry the traffic light; the menu bar title keeps
+// the normal state neutral so a healthy drive is not a green distraction.
+func levelTint(_ level: FreeSpaceLevel) -> NSColor {
+    switch level {
+    case .critical: return .systemRed
+    case .low: return .systemOrange
+    case .normal: return .systemGreen
+    }
+}
+
+func levelSummary(_ level: FreeSpaceLevel) -> String {
+    switch level {
+    case .critical: return "Critically low"
+    case .low: return "Getting tight"
+    case .normal: return "Plenty of room"
     }
 }
 
@@ -227,26 +216,62 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
     }
 
-    private func updateTitle() {
-        guard let info = DiskInfo.current(), let button = statusItem.button else { return }
-        let color: NSColor
-        switch freeSpaceLevel(free: info.free, total: info.total) {
-        case .critical: color = .systemRed
-        case .low: color = .systemOrange
-        case .normal: color = .controlTextColor
-        }
-        button.attributedTitle = NSAttributedString(
-            string: compact(info.free),
-            attributes: [
-                .font: NSFont.monospacedDigitSystemFont(ofSize: 12, weight: .regular),
-                .foregroundColor: color,
-            ])
-        button.toolTip = "Free: \(format(info.free)) of \(format(info.total))"
+    private func currentReports() -> [VolumeReport] {
+        buildReports(
+            volumes: discoverVolumes(),
+            usage: { DiskUsage.current(mountPoint: $0.mountPoint) },
+            measurements: scanner.results,
+            status: status)
     }
 
-    // MARK: Header panel
+    // MARK: Status bar title
 
-    private func makeHeaderView() -> NSView {
+    // One drive-icon-and-number pair per drive, so the two SSDs are told apart
+    // in the menu bar itself rather than only once the menu is open.
+    private func updateTitle() {
+        guard let button = statusItem.button else { return }
+        let reports = currentReports()
+        let title = NSMutableAttributedString()
+        var tooltip: [String] = []
+
+        for report in reports {
+            if title.length > 0 {
+                title.append(NSAttributedString(
+                    string: "  ", attributes: [.font: NSFont.systemFont(ofSize: 12)]))
+            }
+            let level = report.usage.level
+            let color: NSColor = level == .normal ? .controlTextColor : levelTint(level)
+            if let icon = symbolImage(report.volume.symbol, color: color, pointSize: 11) {
+                let attachment = NSTextAttachment()
+                attachment.image = icon
+                // Attachments sit on the text baseline by their bottom edge;
+                // the nudge centres the glyph against the digits beside it.
+                attachment.bounds = NSRect(
+                    x: 0, y: -2.5, width: icon.size.width, height: icon.size.height)
+                title.append(NSAttributedString(attachment: attachment))
+                title.append(NSAttributedString(string: " "))
+            }
+            title.append(NSAttributedString(
+                string: compact(report.usage.free),
+                attributes: [
+                    .font: NSFont.monospacedDigitSystemFont(ofSize: 12, weight: .regular),
+                    .foregroundColor: color,
+                ]))
+            tooltip.append(
+                "\(report.volume.name) (\(report.volume.kind.lowercased())): "
+                    + "\(format(report.usage.free)) free of \(format(report.usage.total))")
+        }
+
+        if title.length == 0 { return }
+        button.attributedTitle = title
+        button.toolTip = tooltip.joined(separator: "\n")
+    }
+
+    // MARK: Panels
+
+    // Shared chrome for the menu's view-backed rows: a fixed-width column with
+    // the menu's own insets, sized to whatever gets stacked into it.
+    private func panel(_ build: (NSStackView, (NSView) -> Void) -> Void) -> NSView {
         let container = NSView()
         let stack = NSStackView()
         stack.orientation = .vertical
@@ -270,83 +295,95 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             ).isActive = true
         }
 
-        // Title row: app name + rescan button.
-        let titleRow = NSStackView()
-        titleRow.orientation = .horizontal
-        titleRow.addArrangedSubview(
-            label("Roomy", font: .boldSystemFont(ofSize: 13)))
-        let spacer = NSView()
-        spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        titleRow.addArrangedSubview(spacer)
-        if let icon = symbolImage("arrow.clockwise", color: .secondaryLabelColor, pointSize: 12) {
-            let rescanButton = NSButton(image: icon, target: self, action: #selector(rescan(_:)))
-            rescanButton.isBordered = false
-            rescanButton.toolTip = "Rescan now"
-            titleRow.addArrangedSubview(rescanButton)
+        build(stack, fillWidth)
+
+        container.layoutSubtreeIfNeeded()
+        container.frame = NSRect(
+            x: 0, y: 0, width: Self.menuWidth, height: container.fittingSize.height)
+        return container
+    }
+
+    private func makeTitleRow() -> NSView {
+        panel { _, fillWidth in
+            let row = NSStackView()
+            row.orientation = .horizontal
+            row.addArrangedSubview(label("Roomy", font: .boldSystemFont(ofSize: 13)))
+            let spacer = NSView()
+            spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
+            row.addArrangedSubview(spacer)
+            if let icon = symbolImage("arrow.clockwise", color: .secondaryLabelColor, pointSize: 12) {
+                let rescanButton = NSButton(image: icon, target: self, action: #selector(rescan(_:)))
+                rescanButton.isBordered = false
+                rescanButton.toolTip = "Rescan now"
+                row.addArrangedSubview(rescanButton)
+            }
+            fillWidth(row)
         }
-        fillWidth(titleRow)
+    }
 
-        guard let info = DiskInfo.current() else {
-            container.layoutSubtreeIfNeeded()
-            container.frame = NSRect(
-                x: 0, y: 0, width: Self.menuWidth, height: container.fittingSize.height)
-            return container
-        }
+    // One card per drive. Name, bus and icon lead so the two drives are never
+    // confused for one another; the numbers under them all belong to that card.
+    private func makeDriveCard(for report: VolumeReport) -> NSView {
+        panel { stack, fillWidth in
+            let usage = report.usage
+            let level = usage.level
+            let tint = levelTint(level)
 
-        let level = freeSpaceLevel(free: info.free, total: info.total)
+            let nameRow = NSStackView()
+            nameRow.orientation = .horizontal
+            nameRow.spacing = 5
+            if let icon = symbolImage(report.volume.symbol, color: tint, pointSize: 13) {
+                nameRow.addArrangedSubview(NSImageView(image: icon))
+            }
+            nameRow.addArrangedSubview(
+                label(report.volume.name, font: .systemFont(ofSize: 12, weight: .semibold)))
+            let spacer = NSView()
+            spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
+            nameRow.addArrangedSubview(spacer)
+            nameRow.addArrangedSubview(label(
+                "\(report.volume.kind) · \(report.volume.mountPoint)",
+                font: .systemFont(ofSize: 10), color: .tertiaryLabelColor))
+            fillWidth(nameRow)
 
-        // Big free number.
-        let big = NSMutableAttributedString(
-            string: format(info.free),
-            attributes: [.font: NSFont.systemFont(ofSize: 24, weight: .bold)])
-        big.append(NSAttributedString(
-            string: "  free",
-            attributes: [
-                .font: NSFont.systemFont(ofSize: 13),
-                .foregroundColor: NSColor.secondaryLabelColor,
-            ]))
-        let bigLabel = NSTextField(labelWithAttributedString: big)
-        stack.addArrangedSubview(bigLabel)
+            let big = NSMutableAttributedString(
+                string: format(usage.free),
+                attributes: [.font: NSFont.systemFont(ofSize: 22, weight: .bold)])
+            big.append(NSAttributedString(
+                string: "  free",
+                attributes: [
+                    .font: NSFont.systemFont(ofSize: 12),
+                    .foregroundColor: NSColor.secondaryLabelColor,
+                ]))
+            stack.addArrangedSubview(NSTextField(labelWithAttributedString: big))
 
-        let percent = Int(Double(info.free) / Double(info.total) * 100)
-        var subText = "of \(format(info.total)) · \(percent)% available"
-        if info.purgeable > gigabyte {
-            subText += " · \(format(info.purgeable)) purgeable"
-        }
-        stack.addArrangedSubview(
-            label(subText, font: .systemFont(ofSize: 11), color: .secondaryLabelColor))
+            var subText = "of \(format(usage.total)) · \(usage.freePercent)% available"
+            if usage.purgeable > gigabyte {
+                subText += " · \(format(usage.purgeable)) purgeable"
+            }
+            stack.addArrangedSubview(
+                label(subText, font: .systemFont(ofSize: 11), color: .secondaryLabelColor))
 
-        // Capacity bar shows *used* space, tinted by how tight things are.
-        let bar = CapacityBar()
-        bar.fraction = 1 - Double(info.free) / Double(info.total)
-        switch level {
-        case .critical: bar.color = .systemRed
-        case .low: bar.color = .systemOrange
-        case .normal: bar.color = .systemGreen
-        }
-        bar.translatesAutoresizingMaskIntoConstraints = false
-        fillWidth(bar)
+            // The bar shows *used* space, tinted by how tight things are.
+            let bar = CapacityBar()
+            bar.fraction = usage.usedFraction
+            bar.color = tint
+            bar.translatesAutoresizingMaskIntoConstraints = false
+            fillWidth(bar)
 
-        let statusText: String
-        switch level {
-        case .critical: statusText = "Storage is critically low"
-        case .low: statusText = "Storage is getting tight"
-        case .normal: statusText = "Plenty of breathing room"
-        }
-        let dot = NSMutableAttributedString(
-            string: "● ",
-            attributes: [.font: NSFont.systemFont(ofSize: 9), .foregroundColor: bar.color])
-        dot.append(NSAttributedString(
-            string: statusText,
-            attributes: [
-                .font: NSFont.systemFont(ofSize: 11),
-                .foregroundColor: NSColor.secondaryLabelColor,
-            ]))
-        stack.addArrangedSubview(NSTextField(labelWithAttributedString: dot))
+            let dot = NSMutableAttributedString(
+                string: "● ",
+                attributes: [.font: NSFont.systemFont(ofSize: 9), .foregroundColor: tint])
+            dot.append(NSAttributedString(
+                string: levelSummary(level),
+                attributes: [
+                    .font: NSFont.systemFont(ofSize: 11),
+                    .foregroundColor: NSColor.secondaryLabelColor,
+                ]))
+            stack.addArrangedSubview(NSTextField(labelWithAttributedString: dot))
 
-        // Reclaimable summary from the scan, split by what is safe right now.
-        let totals = reclaimable(from: scanner.results, status: status)
-        if totals.safeNow > gigabyte || totals.gated > gigabyte {
+            // Reclaimable summary from the scan, split by what is safe right now.
+            let totals = report.reclaimable
+            guard totals.safeNow > gigabyte || totals.gated > gigabyte else { return }
             let row = NSStackView()
             row.orientation = .horizontal
             row.spacing = 6
@@ -374,11 +411,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             row.addArrangedSubview(column)
             stack.addArrangedSubview(row)
         }
-
-        container.layoutSubtreeIfNeeded()
-        container.frame = NSRect(
-            x: 0, y: 0, width: Self.menuWidth, height: container.fittingSize.height)
-        return container
     }
 
     // MARK: Menu
@@ -386,16 +418,39 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private func rebuildMenu() {
         menu.removeAllItems()
 
-        let headerItem = NSMenuItem()
-        headerItem.view = makeHeaderView()
-        menu.addItem(headerItem)
+        let titleItem = NSMenuItem()
+        titleItem.view = makeTitleRow()
+        menu.addItem(titleItem)
 
-        menu.addItem(.separator())
-        menu.addItem(sectionHeader(
-            scanner.scanning ? "Measuring…" : "Largest storage consumers"))
+        let reports = currentReports()
+        for report in reports {
+            menu.addItem(.separator())
+            let card = NSMenuItem()
+            card.view = makeDriveCard(for: report)
+            menu.addItem(card)
+        }
 
-        for measurement in scanner.results.prefix(8) where measurement.size > gigabyte / 2 {
-            menu.addItem(consumerItem(for: measurement))
+        // Consumers stay under the drive they fill: one flat list would leave
+        // every row having to name its own disk.
+        var listed = false
+        for report in reports {
+            let rows = report.measurements
+                .filter { $0.size > gigabyte / 2 }
+                .prefix(5)
+            guard !rows.isEmpty else { continue }
+            listed = true
+            menu.addItem(.separator())
+            menu.addItem(sectionHeader(
+                reports.count > 1
+                    ? "Largest on \(report.volume.name)"
+                    : "Largest storage consumers"))
+            for measurement in rows {
+                menu.addItem(consumerItem(for: measurement))
+            }
+        }
+        if !listed {
+            menu.addItem(.separator())
+            menu.addItem(sectionHeader(scanner.scanning ? "Measuring…" : "Nothing large to list"))
         }
 
         menu.addItem(.separator())

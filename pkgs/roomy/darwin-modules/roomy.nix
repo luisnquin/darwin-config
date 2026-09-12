@@ -4,7 +4,7 @@
   pkgs,
   ...
 }: let
-  inherit (lib) mkEnableOption mkIf mkPackageOption;
+  inherit (lib) mkEnableOption mkIf mkOption mkPackageOption types;
   cfg = config.programs.roomy;
 
   # nix GC chmods store paths before unlinking them, and TCC's App Management
@@ -54,6 +54,20 @@ in {
     enable = mkEnableOption "Roomy, a menu bar free-disk-space indicator";
 
     package = mkPackageOption pkgs "roomy" {};
+
+    sessionEnvironment = mkOption {
+      type = types.nullOr types.path;
+      default = null;
+      example = lib.literalExpression "config.local.ext.guiEnvScript";
+      description = ''
+        Script run before Roomy is opened. Roomy takes the location of the
+        Gradle, Cargo, npm, CocoaPods and AVD caches from the variables that
+        name them, which is the only way it can tell which drive they are on
+        once they are relocated. Whatever agent owns those variables starts in
+        no particular order relative to this one, so they are put in place here
+        rather than assumed to be there already.
+      '';
+    };
   };
 
   config = mkIf cfg.enable {
@@ -64,9 +78,10 @@ in {
     # permission prompts to Roomy rather than to launchd.
     launchd.user.agents.roomy.serviceConfig = {
       ProgramArguments = [
-        "/usr/bin/open"
-        "-a"
-        "${cfg.package}/Applications/Roomy.app"
+        "${pkgs.writeShellScript "roomy-open" ''
+          ${lib.optionalString (cfg.sessionEnvironment != null) "${cfg.sessionEnvironment}"}
+          exec /usr/bin/open -a ${cfg.package}/Applications/Roomy.app
+        ''}"
       ];
       RunAtLoad = true;
     };
