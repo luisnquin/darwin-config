@@ -153,11 +153,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1789255864,
-        "narHash": "sha256-7aRKCMzjoeIn3BAz6GSZaF/CA+ERdbXRPsoyzHuwWzY=",
+        "lastModified": 1789348689,
+        "narHash": "sha256-qseLpVQNbBQ0nRkgipSHko1s0TonjNGw9L9eG/Fmsnw=",
         "owner": "luisnquin",
         "repo": "luisnquin",
-        "rev": "6f29571fa4becd72fdf9ab3a3881b8794dd33676",
+        "rev": "018a192c499bbacdb836fe2161aac5607d4b60b4",
         "type": "github"
       },
       "original": {
