@@ -9,7 +9,7 @@
       };
 
       status = {
-        ssh.enable= false;
+        ssh.enable = false;
         gpg.enable = false;
         lsyncd.enable = false;
         gitmux.enable = true;

@@ -1,9 +1,11 @@
-{
+{inputs, ...}: {
   flake.modules.darwin.minisim = {
     config,
     pkgs,
     ...
-  }: {
+  }: let
+    inherit (inputs.self.lib) ext;
+  in {
     environment.systemPackages = [pkgs.minisim];
 
     system.defaults.CustomUserPreferences."com.oskarkwasniewski.MiniSim" = {
@@ -31,6 +33,10 @@
     launchd.user.agents.minisim.serviceConfig = {
       ProgramArguments = [
         "${pkgs.writeShellScript "minisim-open" ''
+          while ! /sbin/mount | /usr/bin/grep -Fq " on ${ext.path} ("; do
+            /bin/sleep 1
+          done
+
           ${config.local.ext.guiEnvScript}
           exec /usr/bin/open -a ${pkgs.minisim}/Applications/MiniSim.app
         ''}"
