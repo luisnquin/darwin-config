@@ -37,6 +37,7 @@
       NSAppleScriptEnabled = true;
       NSHumanReadableCopyright = "";
       NSPrincipalClass = "NSApplication";
+      NSRemovableVolumesUsageDescription = "MiniSim launches Android tools stored on a removable volume.";
       OSAScriptingDefinition = "MiniSim.sdef";
     };
 in
