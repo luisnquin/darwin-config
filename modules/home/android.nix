@@ -62,7 +62,71 @@
         fi
       '';
     };
+    avdConfig = pkgs.writeShellApplication {
+      name = "avd-config";
+      runtimeInputs = with pkgs; [coreutils gawk];
+      text = ''
+        for home in ${lib.escapeShellArgs config.local.android.avd.homes}; do
+          for ini in "$home"/*.avd/config.ini; do
+            [ -f "$ini" ] || continue
+
+            awk -v pairs=${lib.escapeShellArg (lib.concatStringsSep "\n" (lib.mapAttrsToList (k: v: "${k}=${v}") config.local.android.avd.config))} '
+              BEGIN {
+                n = split(pairs, lines, "\n")
+                for (i = 1; i <= n; i++) {
+                  eq = index(lines[i], "=")
+                  want[substr(lines[i], 1, eq - 1)] = substr(lines[i], eq + 1)
+                }
+              }
+              {
+                eq = index($0, "=")
+                key = substr($0, 1, eq - 1)
+                if (eq && key in want) {
+                  print key "=" want[key]
+                  seen[key] = 1
+                  next
+                }
+                print
+              }
+              END { for (key in want) if (!(key in seen)) print key "=" want[key] }
+            ' "$ini" > "$ini.new"
+
+            if cmp -s "$ini" "$ini.new"; then
+              rm "$ini.new"
+            else
+              mv "$ini.new" "$ini"
+              echo "avd-config: updated $ini"
+            fi
+          done
+        done
+      '';
+    };
   in {
+    options.local.android.avd = {
+      homes = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        # ~/.zsh/.zlogin repoints ANDROID_AVD_HOME there while /ext stalls on Gatekeeper
+        default = [
+          "${config.local.ext.cache}/android/avd"
+          "${config.home.homeDirectory}/android-staged/avd"
+        ];
+        description = "Directories whose AVDs get `config` written into their config.ini.";
+      };
+
+      config = lib.mkOption {
+        type = lib.types.attrsOf lib.types.str;
+        default = {
+          "hw.gpu.enabled" = "yes";
+          "hw.gpu.mode" = "host";
+        };
+        description = ''
+          config.ini keys enforced on every AVD at activation. `hw.gpu.mode=auto`
+          lets the emulator pick lavapipe, and fall back to software GL under
+          memory pressure, which holds its buffers in host RAM.
+        '';
+      };
+    };
+
     options.local.android.sdk = lib.mkOption {
       type = lib.types.str;
       default = "${config.local.ext.cache}/android/sdk";
@@ -83,6 +147,10 @@
 
     config.home = {
       packages = [androidSdkProvision];
+
+      activation.avdConfig = lib.hm.dag.entryAfter ["writeBoundary"] ''
+        $DRY_RUN_CMD ${lib.getExe avdConfig}
+      '';
 
       # cmdline-tools first so the SDK copy shadows the bootstrap cask
       sessionPath = [
