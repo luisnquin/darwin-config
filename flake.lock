@@ -259,11 +259,11 @@
       },
       "locked": {
         "dir": "overlays",
-        "lastModified": 1789255340,
-        "narHash": "sha256-JBq1pxpDEtGCitgfCgjh3iQlore7ZSoau14VaUCzWCU=",
+        "lastModified": 1790193980,
+        "narHash": "sha256-l3FZ7NgZIIqoR3vfkyoR0OO8sjq3K3QoTru7FAKR8f8=",
         "owner": "luisnquin",
         "repo": "nixos-config",
-        "rev": "16b6010b19efe838f6d2ece091b59b033ffbe18e",
+        "rev": "b5f767fb039179b25682406fae5b9bf315ef0492",
         "type": "github"
       },
       "original": {
@@ -281,11 +281,11 @@
       },
       "locked": {
         "dir": "pkgs",
-        "lastModified": 1788369053,
-        "narHash": "sha256-HVPGDozk1+33VczGvahb+D3QuR9LEwtcmC3U/+0dekY=",
+        "lastModified": 1790193980,
+        "narHash": "sha256-l3FZ7NgZIIqoR3vfkyoR0OO8sjq3K3QoTru7FAKR8f8=",
         "owner": "luisnquin",
         "repo": "nixos-config",
-        "rev": "c4d2ef46096d0e3112d7b611fc70f5853ee9526c",
+        "rev": "b5f767fb039179b25682406fae5b9bf315ef0492",
         "type": "github"
       },
       "original": {
