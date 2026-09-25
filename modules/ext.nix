@@ -15,5 +15,7 @@
     #   diskutil eraseDisk APFS ext GPT /dev/diskN
     #   diskutil info -plist /Volumes/ext | plutil -extract VolumeUUID raw -
     uuid = "A50C22EB-BC7D-4385-B426-B2701BEC9491";
+    nixStoreUUID = "44939041-BF47-406B-A178-23B7570A81BE";
+    nixStoreExternal = false;
   };
 }
