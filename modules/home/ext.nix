@@ -37,11 +37,10 @@
         "Library/Caches/org.swift.swiftpm".source = outOfStore "${cache}/swiftpm";
         "Library/Caches/Google".source = outOfStore "${cache}/google";
         "Library/Developer/Xcode/Archives".source = outOfStore "${path}/xcode/archives";
+        # CoreSimulatorService needs Full Disk Access to use the external device set.
+        "Library/Developer/CoreSimulator/Devices".source = outOfStore "${path}/xcode/simulator-devices";
 
         # Xcode has no preference for this one, so a symlink is the only knob.
-        # CoreSimulator/Devices cannot follow: TCC denies CoreSimulatorService
-        # every read and write on an external volume, whatever the mount point,
-        # and a daemon cannot raise the consent prompt that would lift it.
         "Library/Developer/Xcode/iOS DeviceSupport".source = outOfStore "${cache}/xcode/ios-device-support";
       };
 
@@ -63,6 +62,7 @@
             "${cache}/uv"
             "${cache}/tmp"
             "${path}/xcode/archives"
+            "${path}/xcode/simulator-devices"
           ]
         }
         $DRY_RUN_CMD /bin/chmod 0700 ${lib.escapeShellArg "${cache}/tmp"}
