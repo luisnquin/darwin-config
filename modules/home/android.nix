@@ -66,8 +66,9 @@
       name = "avd-config";
       runtimeInputs = with pkgs; [coreutils gawk];
       text = ''
-        for home in ${lib.escapeShellArgs config.local.android.avd.homes}; do
-          for ini in "$home"/*.avd/config.ini; do
+        avdHomes=(${lib.escapeShellArgs config.local.android.avd.homes})
+        for avdHome in "''${avdHomes[@]}"; do
+          for ini in "$avdHome"/*.avd/config.ini; do
             [ -f "$ini" ] || continue
 
             awk -v pairs=${lib.escapeShellArg (lib.concatStringsSep "\n" (lib.mapAttrsToList (k: v: "${k}=${v}") config.local.android.avd.config))} '
@@ -105,11 +106,7 @@
     options.local.android.avd = {
       homes = lib.mkOption {
         type = lib.types.listOf lib.types.str;
-        # ~/.zsh/.zlogin repoints ANDROID_AVD_HOME there while /ext stalls on Gatekeeper
-        default = [
-          "${config.local.ext.cache}/android/avd"
-          "${config.home.homeDirectory}/android-staged/avd"
-        ];
+        default = ["${config.local.ext.cache}/android/avd"];
         description = "Directories whose AVDs get `config` written into their config.ini.";
       };
 

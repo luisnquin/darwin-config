@@ -12,7 +12,7 @@
     # Everything the home modules redirect onto the volume, matched by value
     # so a cache added there needs no second list kept in step here.
     guiVariables =
-      lib.filterAttrs (_: value: lib.isString value && lib.hasPrefix "${ext.path}/" value)
+      lib.filterAttrs (_: value: lib.isString value && lib.hasInfix "${ext.path}/" value)
       hm.home.sessionVariables;
 
     # launchctl setenv is session state, not a file, so it dies with the login

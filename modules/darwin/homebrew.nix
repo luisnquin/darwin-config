@@ -1,4 +1,4 @@
-{
+{inputs, ...}: {
   flake.modules.darwin.homebrew = {
     config,
     pkgs,
@@ -23,6 +23,7 @@
         upgrade = true;
 
         extraEnv = {
+          HOMEBREW_CACHE = "${inputs.self.lib.ext.cache}/homebrew";
           HOMEBREW_NO_ENV_HINTS = "1";
           HOMEBREW_NO_ANALYTICS = "1";
         };
