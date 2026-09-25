@@ -1,8 +1,18 @@
 {
-  flake.modules.darwin.homebrew = {config, ...}: {
+  flake.modules.darwin.homebrew = {
+    config,
+    pkgs,
+    ...
+  }: let
+    sponsorbarTap = pkgs.runCommand "homebrew-sponsorbar-tap" {} ''
+      cp -R ${./homebrew} "$out"
+    '';
+  in {
     nix-homebrew = {
       enable = true;
       user = config.system.primaryUser;
+      taps."luisnquin/homebrew-sponsorbar" = sponsorbarTap;
+      trust.taps = ["luisnquin/sponsorbar"];
     };
 
     homebrew = {
@@ -20,6 +30,7 @@
 
       taps = [
         "nikitabobko/tap"
+        "luisnquin/sponsorbar"
       ];
 
       # CocoaPods must come from Homebrew: the nixpkgs build is not on PATH for
@@ -34,6 +45,7 @@
         "android-commandlinetools"
         "android-studio"
         "ghostty"
+        "luisnquin/sponsorbar/sponsorbar"
       ];
     };
   };

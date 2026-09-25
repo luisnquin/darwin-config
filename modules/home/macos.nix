@@ -11,5 +11,16 @@
       copyApps.enable = true;
       linkApps.enable = false;
     };
+
+    launchd.agents.sponsorbar = {
+      enable = true;
+      config = {
+        ProgramArguments = [
+          "/Applications/SponsorBar.app/Contents/MacOS/SponsorBar"
+        ];
+        ProcessType = "Interactive";
+        RunAtLoad = true;
+      };
+    };
   };
 }
