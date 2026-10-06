@@ -12,7 +12,7 @@
         ssh.enable = false;
         gpg.enable = false;
         lsyncd.enable = false;
-        gitmux.enable = true;
+        git.enable = true;
       };
     };
   };
