@@ -1,5 +1,7 @@
 {
   flake.modules.homeManager.macos = {
+    imports = [../../pkgs/sponsorbar-hover/hm-modules];
+
     # home-manager stopped shipping its own man on darwin, so the index it
     # would build is dead weight; /usr/bin/man still finds profile pages by
     # walking PATH. Only apropos loses its index.
@@ -22,5 +24,7 @@
         RunAtLoad = true;
       };
     };
+
+    services.sponsorbar-hover.enable = true;
   };
 }

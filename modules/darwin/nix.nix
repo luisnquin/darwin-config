@@ -58,6 +58,7 @@
         inputs.self.overlays.minisim
         inputs.self.overlays.pymobiledevice3
         inputs.self.overlays.roomy
+        inputs.self.overlays.sponsorbar-hover
       ];
       config.allowUnfree = true;
     };
