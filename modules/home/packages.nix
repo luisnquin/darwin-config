@@ -1,5 +1,9 @@
 {inputs, ...}: {
-  flake.modules.homeManager.packages = {pkgs, ...}: let
+  flake.modules.homeManager.packages = {
+    config,
+    pkgs,
+    ...
+  }: let
     phone = inputs.nixos-config-pkgs.packages.${pkgs.stdenv.hostPlatform.system}.phone;
   in {
     home.packages = with pkgs; [
@@ -15,6 +19,10 @@
       enable = true;
       domain = "user";
       config = {
+        EnvironmentVariables = {
+          inherit (config.home.sessionVariables) ANDROID_HOME ANDROID_SDK_ROOT ANDROID_AVD_HOME;
+          SHELL = "/bin/sh";
+        };
         ProgramArguments = [
           "${phone}/bin/phone"
           "daemon"
