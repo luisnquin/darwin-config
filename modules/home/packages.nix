@@ -11,28 +11,32 @@
       senv
     ];
 
-    launchd.agents.phone.serviceConfig = {
-      ProgramArguments = [
-        "${phone}/bin/phone"
-        "daemon"
-        "--keep"
-        "pixel_7-api36"
-        "--keep"
-        "pixel_7-api36-b"
-        "--keep"
-        "pixel_7-api36-c"
-        "--adopt"
-        "qa-1"
-        "--adopt"
-        "qa-2"
-        "--adopt"
-        "qa-3"
-      ];
-      RunAtLoad = true;
-      KeepAlive = true;
-      ThrottleInterval = 30;
-      StandardOutPath = "/tmp/phone-daemon.log";
-      StandardErrorPath = "/tmp/phone-daemon.log";
+    launchd.agents.phone = {
+      enable = true;
+      domain = "user";
+      config = {
+        ProgramArguments = [
+          "${phone}/bin/phone"
+          "daemon"
+          "--keep"
+          "pixel_7-api36"
+          "--keep"
+          "pixel_7-api36-b"
+          "--keep"
+          "pixel_7-api36-c"
+          "--adopt"
+          "qa-1"
+          "--adopt"
+          "qa-2"
+          "--adopt"
+          "qa-3"
+        ];
+        RunAtLoad = true;
+        KeepAlive = true;
+        ThrottleInterval = 30;
+        StandardOutPath = "/tmp/phone-daemon.log";
+        StandardErrorPath = "/tmp/phone-daemon.log";
+      };
     };
   };
 }
