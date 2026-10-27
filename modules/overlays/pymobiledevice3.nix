@@ -8,11 +8,26 @@
     pythonPackagesExtensions =
       (prev.pythonPackagesExtensions or [])
       ++ [
-        (pyfinal: pyprev: {
+        (_pyfinal: pyprev: {
           pyimg4 = pyprev.pyimg4.overridePythonAttrs (old: {
             pythonRelaxDeps = (old.pythonRelaxDeps or []) ++ ["asn1"];
             doCheck = false;
             meta = (old.meta or {}) // {broken = false;};
+          });
+          # The tunnel service patches qh3.quic.packet_builder, gone in qh3 2.
+          qh3 = pyprev.qh3.overridePythonAttrs (old: rec {
+            version = "1.9.4";
+            src = final.fetchFromGitHub {
+              owner = "jawah";
+              repo = "qh3";
+              tag = "v${version}";
+              hash = "sha256-Mu9wvwHHn5wZfE+TdMu/nr2B7+WbFhFHDoItDs6rRPM=";
+            };
+            cargoDeps = final.rustPlatform.fetchCargoVendor {
+              inherit (old) pname;
+              inherit version src;
+              hash = "sha256-bwdaM+DdXm5YpzVlyYdDqnR+QQ0dY199DYN2g33RvCs=";
+            };
           });
         })
       ];
