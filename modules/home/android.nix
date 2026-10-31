@@ -115,6 +115,7 @@
         default = {
           "hw.gpu.enabled" = "yes";
           "hw.gpu.mode" = "host";
+          "hw.ramSize" = "3G";
         };
         description = ''
           config.ini keys enforced on every AVD at activation. `hw.gpu.mode=auto`
