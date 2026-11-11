@@ -48,6 +48,7 @@
       package = pkgs.lix;
       optimise.automatic = true;
       channel.enable = false;
+      linux-builder.enable = true;
     };
 
     nixpkgs = {
