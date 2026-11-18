@@ -1,7 +1,9 @@
 {
   actool,
+  apple-sdk_26,
   darwin,
   fetchFromGitHub,
+  jq,
   lib,
   librsvg,
   perl,
@@ -70,6 +72,7 @@ in
     nativeBuildInputs = [
       actool
       darwin.autoSignDarwinBinariesHook
+      jq
       librsvg
       perl
       swift
@@ -77,16 +80,32 @@ in
     ];
 
     configurePhase =
-      generated.configure
+      # swift's propagated SDK 27 outranks buildInputs and needs Xcode's
+      # SwiftUIMacros plugin for @State, so pin SDK 26 here.
+      ''
+        export DEVELOPER_DIR=${apple-sdk_26} SDKROOT=${apple-sdk_26.sdkroot}
+      ''
+      + generated.configure
       # `#Preview` expands through Xcode's SwiftUI macro plugin, which the
       # nixpkgs toolchain does not ship. The blocks only feed Xcode's canvas.
       + ''
-        for dep in KeyboardShortcuts SymbolPicker; do
+        for dep in KeyboardShortcuts Settings SymbolPicker; do
           swiftpmMakeMutable "$dep"
         done
         perl -0pi -e 's/^#Preview\b[^\n]*\{\n(?:.*\n)*?\}\n//mg' \
           .build/checkouts/KeyboardShortcuts/Sources/KeyboardShortcuts/Recorder.swift \
           .build/checkouts/SymbolPicker/Sources/SymbolPicker/SymbolPicker.swift
+      ''
+      + ''
+        res=.build/checkouts/Settings/Sources/Settings/Resources
+        for lang in $(jq -r '[.strings[].localizations | keys[]] | unique[]' "$res/Localizable.xcstrings"); do
+          mkdir -p "$res/$lang.lproj"
+          jq -r --arg l "$lang" '.strings | to_entries[]
+            | select(.value.localizations[$l])
+            | "\(.key | tojson) = \(.value.localizations[$l].stringUnit.value | tojson);"' \
+            "$res/Localizable.xcstrings" > "$res/$lang.lproj/Localizable.strings"
+        done
+        rm "$res/Localizable.xcstrings"
       '';
 
     installPhase = ''
