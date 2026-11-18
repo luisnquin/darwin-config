@@ -140,7 +140,10 @@
         package = jdk;
       };
 
-      gradle.enable = true;
+      gradle = {
+        enable = true;
+        home = "${config.local.ext.cache}/gradle";
+      };
     };
 
     config.home = {

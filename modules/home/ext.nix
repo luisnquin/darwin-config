@@ -16,7 +16,6 @@
         CP_HOME_DIR = "${cache}/cocoapods";
         CP_CACHE_DIR = "${cache}/cocoapods-downloads";
         DOTSLASH_CACHE = "${cache}/dotslash";
-        GRADLE_USER_HOME = "${cache}/gradle";
         HOMEBREW_CACHE = "${cache}/homebrew";
         JAVA_TOOL_OPTIONS = "-Djava.io.tmpdir=${cache}/tmp";
         PIP_CACHE_DIR = "${cache}/pip";
