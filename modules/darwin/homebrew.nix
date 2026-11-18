@@ -29,10 +29,7 @@
         };
       };
 
-      taps = [
-        "nikitabobko/tap"
-        "luisnquin/sponsorbar"
-      ];
+      taps = ["luisnquin/sponsorbar"];
 
       # CocoaPods must come from Homebrew: the nixpkgs build is not on PATH for
       # Xcode, so iOS pod installs resolve this one. Undeclared it counted as
