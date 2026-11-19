@@ -1,5 +1,5 @@
 {
-  flake.modules.darwin.defaults = {config, ...}: {
+  flake.modules.darwin.defaults = {...}: {
     system.defaults = {
       NSGlobalDomain = {
         "com.apple.swipescrolldirection" = false;
@@ -58,6 +58,9 @@
           NSAutomaticQuoteSubstitutionEnabled = false;
           NSAutomaticSpellingCorrectionEnabled = false;
           NSDocumentSaveNewDocumentsToCloud = false;
+        };
+        "com.apple.loginwindow" = {
+          TALBlockSavingAndLaunch = true;
         };
         finder = {
           ShowExternalHardDrivesOnDesktop = true;
