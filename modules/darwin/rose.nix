@@ -17,6 +17,7 @@
       power
       roomy
       shared
+      signedApps
       tailscale
       userActivation
       users

@@ -20,6 +20,8 @@
 	<string>13.0</string>
 	<key>LSUIElement</key>
 	<true/>
+	<key>NSRemovableVolumesUsageDescription</key>
+	<string>Roomy measures caches stored on a removable volume.</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 </dict>

@@ -92,7 +92,7 @@
       # Agents start in an unspecified order, so an app needing these cannot
       # rely on this one having run; minisim re-runs the script before opening.
       launchd.user.agents.ext-env.serviceConfig = {
-        ProgramArguments = ["${guiEnv}"];
+        ProgramArguments = ["/bin/sh" "-c" "exec ${guiEnv}"];
         RunAtLoad = true;
       };
 

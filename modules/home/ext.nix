@@ -28,6 +28,8 @@
       file = {
         # Working trees, including the ones no remote has a copy of.
         "Projects".source = outOfStore "${path}/projects";
+        "squad".source = outOfStore "${path}/scratch/squad";
+        "qa".source = outOfStore "${path}/scratch/qa";
         ".bun/install/cache".source = outOfStore "${cache}/bun";
         ".cache".source = outOfStore "${cache}/xdg";
         "${config.home.homeDirectory}/.cache/.keep".enable = false;
@@ -48,6 +50,8 @@
         $DRY_RUN_CMD /bin/mkdir -p ${
           lib.escapeShellArgs [
             "${path}/projects"
+            "${path}/scratch/squad"
+            "${path}/scratch/qa"
             "${cache}/android/avd"
             "${cache}/xcode/ios-device-support"
             "${cache}/bun"
