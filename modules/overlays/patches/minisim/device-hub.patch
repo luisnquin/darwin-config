@@ -1,0 +1,45 @@
+diff --git a/MiniSim/Service/AppleUtils.swift b/MiniSim/Service/AppleUtils.swift
+index 523a279..86e60a3 100644
+--- a/MiniSim/Service/AppleUtils.swift
++++ b/MiniSim/Service/AppleUtils.swift
+@@ -25,19 +25,32 @@ class AppleUtils {
+   }
+ 
+   static func launchSimulatorApp(uuid: String) throws {
++    guard let activeDeveloperDir = try? shell.execute(
++      command: DeviceConstants.ProcessPaths.xcodeSelect.rawValue,
++      arguments: ["-p"]
++    )
++      .trimmingCharacters(in: .whitespacesAndNewlines) else {
++      throw DeviceError.xcodeError
++    }
++
++    // Xcode 27 replaced Simulator.app with Device Hub, one window for every
++    // device. OpenDeviceHub, when installed, gives this device its own window.
++    let simulator = "\(activeDeveloperDir)/Applications/Simulator.app"
++    guard FileManager.default.fileExists(atPath: simulator) else {
++      if workspace.urlForApplication(withBundleIdentifier: "io.github.mastersam07.simviewer") != nil {
++        try shell.execute(command: "/usr/bin/open", arguments: ["odhub://open?udid=\(uuid)"])
++      } else {
++        try shell.execute(command: "/usr/bin/open", arguments: ["-b", "com.apple.dt.Devices"])
++      }
++      return
++    }
++
+     let isSimulatorRunning = workspace.runningApplications
+       .contains { $0.bundleIdentifier == "com.apple.iphonesimulator" }
+ 
+     if !isSimulatorRunning {
+-      guard let activeDeveloperDir = try? shell.execute(
+-        command: DeviceConstants.ProcessPaths.xcodeSelect.rawValue,
+-        arguments: ["-p"]
+-      )
+-        .trimmingCharacters(in: .whitespacesAndNewlines) else {
+-        throw DeviceError.xcodeError
+-      }
+       try shell.execute(
+-        command: "\(activeDeveloperDir)/Applications/Simulator.app/Contents/MacOS/Simulator",
++        command: "\(simulator)/Contents/MacOS/Simulator",
+         arguments: ["--args", "-CurrentDeviceUDID", uuid]
+       )
+     }

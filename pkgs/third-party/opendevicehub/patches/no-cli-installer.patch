@@ -1,0 +1,17 @@
+diff --git a/engine/Sources/ODHubViewerApp/ViewerMain.swift b/engine/Sources/ODHubViewerApp/ViewerMain.swift
+index 2efb26f..98616dc 100644
+--- a/engine/Sources/ODHubViewerApp/ViewerMain.swift
++++ b/engine/Sources/ODHubViewerApp/ViewerMain.swift
+@@ -542,11 +542,7 @@ struct ODHubViewer: ParsableCommand {
+                     ))
+                 }
+             ), capabilities: adapter.capabilities, openSimulatorMenu: chooser.menu,
+-               commandLineTool: CommandLineToolInstaller.bundledTool == nil ? nil : CommandLineToolMenu(
+-                   state: { CommandLineToolInstaller.state() },
+-                   install: { CommandLineToolInstaller.install() },
+-                   remove: { CommandLineToolInstaller.remove() }
+-               ))
++               commandLineTool: nil)
+             if let updates {
+                 print("updates: \(updates.feedURL ?? "configured, feed unreadable")")
+             } else {

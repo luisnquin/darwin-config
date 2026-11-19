@@ -1,0 +1,14 @@
+diff --git a/engine/Sources/ODHubViewerApp/ViewerMain.swift b/engine/Sources/ODHubViewerApp/ViewerMain.swift
+index 98616dc..95e8c08 100644
+--- a/engine/Sources/ODHubViewerApp/ViewerMain.swift
++++ b/engine/Sources/ODHubViewerApp/ViewerMain.swift
+@@ -77,6 +77,9 @@ struct ODHubViewer: ParsableCommand {
+         try MainActor.assumeIsolated {
+             let application = NSApplication.shared
+             application.setActivationPolicy(.regular)
++            // AppKit registers with the accessibility server here, which run() would
++            // only do after every window below is already up.
++            application.finishLaunching()
+ 
+             let store = WindowFrameStore()
+             if resetWindowPosition {

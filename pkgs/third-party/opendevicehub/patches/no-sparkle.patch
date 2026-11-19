@@ -1,0 +1,139 @@
+diff --git a/engine/Package.resolved b/engine/Package.resolved
+index e48cebf..21b9b64 100644
+--- a/engine/Package.resolved
++++ b/engine/Package.resolved
+@@ -1,15 +1,6 @@
+ {
+   "originHash" : "35c444cdb55127c7883f08eeed7ddf376b3068c1f17e8b8f51b4a3ca0d009140",
+   "pins" : [
+-    {
+-      "identity" : "sparkle",
+-      "kind" : "remoteSourceControl",
+-      "location" : "https://github.com/sparkle-project/Sparkle",
+-      "state" : {
+-        "revision" : "eef1a539a373c1f1a320624b1130fc5de7b2e100",
+-        "version" : "2.10.0"
+-      }
+-    },
+     {
+       "identity" : "swift-argument-parser",
+       "kind" : "remoteSourceControl",
+diff --git a/engine/Package.swift b/engine/Package.swift
+index 468d580..f67e391 100644
+--- a/engine/Package.swift
++++ b/engine/Package.swift
+@@ -12,7 +12,6 @@ let package = Package(
+     ],
+     dependencies: [
+         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.5.0"),
+-        .package(url: "https://github.com/sparkle-project/Sparkle", from: "2.10.0"),
+     ],
+     targets: [
+         .target(name: "OpenDeviceHubPrivate"),
+@@ -40,10 +39,6 @@ let package = Package(
+                 "OpenDeviceHubEngine",
+                 "OpenDeviceHubViewer",
+                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
+-                .product(name: "Sparkle", package: "Sparkle"),
+-            ],
+-            linkerSettings: [
+-                .unsafeFlags(["-Xlinker", "-rpath", "-Xlinker", "@executable_path/../Frameworks"]),
+             ]
+         ),
+         .testTarget(
+diff --git a/engine/Sources/ODHubViewerApp/UpdateController.swift b/engine/Sources/ODHubViewerApp/UpdateController.swift
+index 742caed..0f1eb35 100644
+--- a/engine/Sources/ODHubViewerApp/UpdateController.swift
++++ b/engine/Sources/ODHubViewerApp/UpdateController.swift
+@@ -1,67 +1,14 @@
+-import AppKit
+-import OpenDeviceHubEngine
+-import Sparkle
+-
+-/// In-app updates, and the gate that decides whether they exist at all.
+-///
+-/// The updater only starts when the running bundle carries both a feed to ask and a public key to
+-/// check the answer against. A source build has no bundle and therefore neither, so it never
+-/// reaches the release channel: no request is made, no menu item appears, and Sparkle's background
+-/// scheduler is never created.
++/// Updates come through nix, so this build carries no update channel.
+ @MainActor
+ final class UpdateController {
+-    /// What an update needs before it can be trusted. Without the key, a feed is just a stranger
+-    /// offering software.
+-    struct Configuration: Equatable {
+-        let feed: String
+-        let publicKey: String
++    init?() { nil }
+ 
+-        /// Read from the bundle rather than compiled in, so the same binary is a development build
+-        /// outside a bundle and a release inside one.
+-        static func fromBundle(_ bundle: Bundle = .main) -> Configuration? {
+-            guard let feed = bundle.object(forInfoDictionaryKey: "SUFeedURL") as? String,
+-                  let key = bundle.object(forInfoDictionaryKey: "SUPublicEDKey") as? String,
+-                  !feed.isEmpty,
+-                  !key.isEmpty,
+-                  URL(string: feed)?.scheme == "https" else {
+-                return nil
+-            }
+-            return Configuration(feed: feed, publicKey: key)
+-        }
+-    }
++    func checkForUpdates() {}
+ 
+-    private let controller: SPUStandardUpdaterController
+-
+-    /// Nil when this build is not configured for updates, which is what keeps the updater out of
+-    /// source builds entirely rather than merely quiet in them.
+-    init?(configuration: Configuration? = .fromBundle()) {
+-        guard configuration != nil else { return nil }
+-        controller = SPUStandardUpdaterController(
+-            startingUpdater: true,
+-            updaterDelegate: nil,
+-            userDriverDelegate: nil
+-        )
+-    }
+-
+-    func checkForUpdates() {
+-        controller.checkForUpdates(nil)
+-    }
+-
+-    /// Sparkle's own background schedule. Exposed so Settings can turn it off without the window
+-    /// needing to know Sparkle exists.
+-    /// Checking and downloading move together, because "install updates automatically" that only
+-    /// checks would be a switch that does half of what it says. Installing still waits for the
+-    /// person, which is Sparkle's `SUAutomaticallyUpdate`, left off deliberately.
+     var checksAutomatically: Bool {
+-        get { controller.updater.automaticallyChecksForUpdates }
+-        set {
+-            controller.updater.automaticallyChecksForUpdates = newValue
+-            controller.updater.automaticallyDownloadsUpdates = newValue
+-        }
++        get { false }
++        set {}
+     }
+ 
+-    /// Whether the updater found the feed usable, for reporting rather than for control flow.
+-    var feedURL: String? {
+-        controller.updater.feedURL?.absoluteString
+-    }
++    var feedURL: String? { nil }
+ }
+diff --git a/packaging/Info.plist b/packaging/Info.plist
+index 480e5c1..a45b63f 100644
+--- a/packaging/Info.plist
++++ b/packaging/Info.plist
+@@ -34,13 +34,5 @@
+     </dict>
+   </array>
+ 
+-  <!-- Sparkle. The feed and the key are what make this a release build: without both, the updater
+-       is never created. Neither may change once a version has shipped. -->
+-  <key>SUFeedURL</key><string>https://mastersam07.github.io/appcast/simviewer.xml</string>
+-  <key>SUPublicEDKey</key><string>ZvBlUJbzcMueAq6HtYF6yq9lRrtb6BCHN+F/FWRJG4M=</string>
+-  <key>SUEnableAutomaticChecks</key><true/>
+-  <key>SUScheduledCheckInterval</key><integer>86400</integer>
+-  <!-- The user decides when to install. Silent installation is off deliberately. -->
+-  <key>SUAutomaticallyUpdate</key><false/>
+ </dict>
+ </plist>

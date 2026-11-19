@@ -1,0 +1,29 @@
+diff --git a/engine/Sources/ODHubViewerApp/ViewerMain.swift b/engine/Sources/ODHubViewerApp/ViewerMain.swift
+index 2efb26f..bb254bf 100644
+--- a/engine/Sources/ODHubViewerApp/ViewerMain.swift
++++ b/engine/Sources/ODHubViewerApp/ViewerMain.swift
+@@ -61,7 +61,7 @@ struct ODHubViewer: ParsableCommand {
+         let install = try XcodeLocator.locate()
+         let adapter = try AdapterFactory.make(for: install)
+         MainActor.assumeIsolated { StartupFailure.reportUnverifiedXcode(install) }
+-        let devices = try adapter.devices()
++        let devices = try devicesOnceAvailable(adapter)
+         let recent = RecentDeviceStore()
+         let launchedFromAnIcon = udids.isEmpty
+         let settings = ViewerSettings()
+@@ -606,6 +606,15 @@ struct ODHubViewer: ParsableCommand {
+         }
+     }
+ 
++    /// Reopened at login, this can run before the volume holding the device set is mounted.
++    private func devicesOnceAvailable(_ adapter: any SimulatorAdapter) throws -> [DeviceInfo] {
++        for _ in 0..<30 {
++            if let devices = try? adapter.devices() { return devices }
++            sleep(2)
++        }
++        return try adapter.devices()
++    }
++
+     @MainActor
+     private func open(
+         udid: String,
