@@ -281,11 +281,11 @@
       },
       "locked": {
         "dir": "pkgs",
-        "lastModified": 1795031923,
-        "narHash": "sha256-qKoPykyfQE0IbAs/1f+dy/WEucPUUXThr57qEKTOa0U=",
+        "lastModified": 1795623582,
+        "narHash": "sha256-uQCfxLlA/biqGnDrwhs7ORSmvc6y6fVdNuPz76nfLwI=",
         "owner": "luisnquin",
         "repo": "nixos-config",
-        "rev": "b946f29e77b89694dd0d43f3625c4a7e02f8f8f5",
+        "rev": "f3b6651fa749893bd98fc105ae0f79e4297de5cd",
         "type": "github"
       },
       "original": {
